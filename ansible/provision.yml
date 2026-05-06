@@ -1,0 +1,236 @@
+---
+# Идемпотентная настройка свежего Ubuntu 22.04/24.04 VPS.
+# Запускается из CI workflow `provision.yml` руками (workflow_dispatch).
+# Не трогает код приложения — только система. Деплой — отдельный плейбук.
+
+- name: Provision FastLanes VPS
+  hosts: fastlanes
+  become: true
+  gather_facts: true
+
+  tasks:
+    # ---------- Базовая система ----------
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install base packages
+      ansible.builtin.apt:
+        name:
+          - curl
+          - ca-certificates
+          - gnupg
+          - git
+          - ufw
+          - build-essential
+          - python3-psycopg2
+          - acl
+        state: present
+
+    # ---------- Firewall ----------
+    - name: UFW allow SSH
+      community.general.ufw:
+        rule: allow
+        name: OpenSSH
+
+    - name: UFW allow HTTP/HTTPS
+      community.general.ufw:
+        rule: allow
+        port: "{{ item }}"
+        proto: tcp
+      loop: ["80", "443"]
+
+    - name: UFW enable
+      community.general.ufw:
+        state: enabled
+        policy: deny
+
+    # ---------- Node.js ----------
+    - name: Ensure apt keyrings dir
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "0755"
+
+    - name: Add NodeSource apt key
+      ansible.builtin.get_url:
+        url: https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+        dest: /etc/apt/keyrings/nodesource.asc
+        mode: "0644"
+        force: true
+
+    - name: Add NodeSource apt repo
+      ansible.builtin.apt_repository:
+        repo: "deb [signed-by=/etc/apt/keyrings/nodesource.asc] https://deb.nodesource.com/node_{{ nodejs_major }}.x nodistro main"
+        filename: nodesource
+        state: present
+        update_cache: true
+
+    - name: Install Node.js
+      ansible.builtin.apt:
+        name: nodejs
+        state: present
+
+    # ---------- PostgreSQL ----------
+    - name: Install PostgreSQL
+      ansible.builtin.apt:
+        name:
+          - postgresql
+          - postgresql-contrib
+        state: present
+
+    - name: Ensure PostgreSQL running
+      ansible.builtin.service:
+        name: postgresql
+        state: started
+        enabled: true
+
+    - name: Create app DB user
+      become_user: postgres
+      community.postgresql.postgresql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        state: present
+
+    - name: Create app database
+      become_user: postgres
+      community.postgresql.postgresql_db:
+        name: "{{ db_name }}"
+        owner: "{{ db_user }}"
+        encoding: UTF-8
+        lc_collate: en_US.UTF-8
+        lc_ctype: en_US.UTF-8
+        template: template0
+        state: present
+
+    # ---------- Deploy user ----------
+    - name: Create deploy user
+      ansible.builtin.user:
+        name: "{{ app_user }}"
+        shell: /bin/bash
+        groups: www-data
+        append: true
+        create_home: true
+        state: present
+
+    # Тот же SSH-ключ, которым CI ходил под root, используем и для deploy-юзера.
+    # Берём из ~root/.ssh/authorized_keys (его пользователь добавляет один раз руками
+    # на свежем сервере — см. README).
+    - name: Read root authorized_keys
+      ansible.builtin.slurp:
+        src: /root/.ssh/authorized_keys
+      register: root_authorized_keys
+
+    - name: Authorize deploy SSH key (same as root's)
+      ansible.posix.authorized_key:
+        user: "{{ app_user }}"
+        key: "{{ root_authorized_keys.content | b64decode }}"
+        state: present
+        exclusive: true
+
+    - name: Allow deploy user to manage fastlanes service without password
+      ansible.builtin.copy:
+        dest: /etc/sudoers.d/deploy-fastlanes
+        content: "{{ app_user }} ALL=(root) NOPASSWD: /bin/systemctl restart {{ service_name }}, /bin/systemctl status {{ service_name }}, /bin/systemctl start {{ service_name }}, /bin/systemctl stop {{ service_name }}\n"
+        mode: "0440"
+        validate: /usr/sbin/visudo -cf %s
+
+    # ---------- App directory + .env ----------
+    - name: Create app directory
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: "0755"
+
+    - name: Render production .env
+      ansible.builtin.template:
+        src: templates/env.j2
+        dest: "{{ app_dir }}/.env"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: "0600"
+
+    - name: Initial git clone (if missing)
+      become_user: "{{ app_user }}"
+      ansible.builtin.git:
+        repo: "{{ app_repo }}"
+        dest: "{{ app_dir }}"
+        version: main
+        depth: 1
+        update: false
+
+    # ---------- systemd ----------
+    - name: Install fastlanes systemd unit
+      ansible.builtin.template:
+        src: templates/fastlanes.service.j2
+        dest: "/etc/systemd/system/{{ service_name }}.service"
+        mode: "0644"
+      notify: Reload systemd
+
+    - name: Enable fastlanes service
+      ansible.builtin.systemd:
+        name: "{{ service_name }}"
+        enabled: true
+
+    # ---------- Nginx ----------
+    - name: Install Nginx
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+
+    - name: Render Nginx site
+      ansible.builtin.template:
+        src: templates/nginx-fastlanes.conf.j2
+        dest: "/etc/nginx/sites-available/{{ domain }}"
+        mode: "0644"
+      notify: Reload nginx
+
+    - name: Enable Nginx site
+      ansible.builtin.file:
+        src: "/etc/nginx/sites-available/{{ domain }}"
+        dest: "/etc/nginx/sites-enabled/{{ domain }}"
+        state: link
+        force: true
+      notify: Reload nginx
+
+    - name: Remove default Nginx site
+      ansible.builtin.file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Reload nginx
+
+    - name: Ensure Nginx running
+      ansible.builtin.service:
+        name: nginx
+        state: started
+        enabled: true
+
+    # ---------- Let's Encrypt ----------
+    - name: Install certbot
+      ansible.builtin.apt:
+        name:
+          - certbot
+          - python3-certbot-nginx
+        state: present
+
+    - name: Issue Let's Encrypt cert
+      ansible.builtin.command: >-
+        certbot --nginx -n --agree-tos
+        --email {{ letsencrypt_email }}
+        -d {{ domain }}
+      args:
+        creates: "/etc/letsencrypt/live/{{ domain }}/fullchain.pem"
+      notify: Reload nginx
+
+  handlers:
+    - name: Reload systemd
+      ansible.builtin.systemd:
+        daemon_reload: true
+
+    - name: Reload nginx
+      ansible.builtin.service:
+        name: nginx
+        state: reloaded

@@ -1,0 +1,23 @@
+---
+# Несекретные параметры. Секреты — в vault.yml (зашифрованы ansible-vault).
+
+domain: fastlanes.pp.ua
+letsencrypt_email: admin@fastlanes.pp.ua
+
+nodejs_major: "20"
+
+app_dir: /var/www/fastlanes
+app_user: deploy
+app_repo: "https://github.com/notguilty01010/fastlanes.git"
+
+db_name: fastlanes
+db_user: fastlanes
+
+service_name: fastlanes
+
+# Эти переменные приходят из vault.yml:
+#   vault_db_password
+#   vault_auth_secret
+
+db_password: "{{ vault_db_password }}"
+auth_secret: "{{ vault_auth_secret }}"

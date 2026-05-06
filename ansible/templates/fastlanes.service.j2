@@ -1,0 +1,27 @@
+[Unit]
+Description=FastLanes Next.js app
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User={{ app_user }}
+Group={{ app_user }}
+WorkingDirectory={{ app_dir }}
+EnvironmentFile={{ app_dir }}/.env
+ExecStart=/usr/bin/npm run start
+Restart=on-failure
+RestartSec=5
+# 0.0.0.0 не нужен — Nginx ходит на localhost.
+Environment=PORT=3000
+Environment=HOST=127.0.0.1
+Environment=NODE_ENV=production
+
+# Безопасность
+NoNewPrivileges=true
+ProtectSystem=full
+ProtectHome=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

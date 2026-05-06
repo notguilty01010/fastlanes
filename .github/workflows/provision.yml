@@ -1,0 +1,55 @@
+name: Provision server
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: infra-prod
+  cancel-in-progress: false
+
+jobs:
+  provision:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    environment:
+      name: production
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Ansible
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ansible
+          ansible-galaxy collection install community.general community.postgresql ansible.posix
+
+      - name: Configure SSH
+        env:
+          SSH_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts
+
+      - name: Write vault password
+        env:
+          VAULT_PASS: ${{ secrets.ANSIBLE_VAULT_PASSWORD }}
+        run: printf '%s' "$VAULT_PASS" > "$HOME/.vault_pass"
+
+      - name: Run provision playbook
+        working-directory: ansible
+        env:
+          ANSIBLE_VAULT_PASSWORD_FILE: ${{ env.HOME }}/.vault_pass
+          ANSIBLE_HOST_KEY_CHECKING: "False"
+        run: |
+          ansible-playbook \
+            --vault-password-file "$HOME/.vault_pass" \
+            --user root \
+            --private-key ~/.ssh/id_ed25519 \
+            provision.yml
+
+      - name: Cleanup secrets
+        if: always()
+        run: rm -f ~/.ssh/id_ed25519 ~/.vault_pass
