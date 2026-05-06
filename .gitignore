@@ -52,3 +52,4 @@ Thumbs.db
 /prisma/*.db-journal
 
 /.claude
+CLAUDE.md
