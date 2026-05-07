@@ -1,7 +1,8 @@
 "use client";
 
-// Здесь позже подключатся: SessionProvider от Auth.js (этап 3),
-// тема (если будет), QueryClientProvider и т.п. Пока — заглушка.
+import { SessionProvider } from "next-auth/react";
+
+// Здесь позже подключатся: тема, QueryClientProvider и т.п.
 export function Providers({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <SessionProvider>{children}</SessionProvider>;
 }

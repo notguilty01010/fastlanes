@@ -14,5 +14,14 @@ service_name: fastlanes
 
 # Эти переменные приходят из vault.yml:
 #   vault_auth_secret
+#   vault_admin_initial_email     (опционально, для сидинга первого админа)
+#   vault_admin_initial_password  (опционально, для сидинга первого админа)
+#   vault_admin_initial_name      (опционально)
+#
+# Сид (`npx prisma db seed`) идемпотентен: если в БД уже есть admin,
+# переменные игнорируются.
 
 auth_secret: "{{ vault_auth_secret }}"
+admin_initial_email: "{{ vault_admin_initial_email | default('') }}"
+admin_initial_password: "{{ vault_admin_initial_password | default('') }}"
+admin_initial_name: "{{ vault_admin_initial_name | default('Admin') }}"

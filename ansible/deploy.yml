@@ -47,6 +47,12 @@
         chdir: "{{ app_dir }}"
       changed_when: true
 
+    - name: prisma db seed (создаёт первого админа, если его нет)
+      ansible.builtin.command:
+        cmd: npx prisma db seed
+        chdir: "{{ app_dir }}"
+      changed_when: true
+
     - name: next build
       ansible.builtin.command:
         cmd: npm run build

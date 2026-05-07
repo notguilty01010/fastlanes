@@ -3,6 +3,9 @@
   --fg: #e6e6e6;
   --muted: #9aa0a6;
   --link: #5aa9ff;
+  --border: #2a2e34;
+  --danger: #ff6b6b;
+  --accent: #5aa9ff;
 }
 
 * {
@@ -25,11 +28,145 @@ body {
 }
 
 main {
-  max-width: 720px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 2rem 1rem;
 }
 
 a {
   color: var(--link);
+}
+
+h1,
+h2,
+h3 {
+  margin-top: 0;
+}
+
+form label {
+  display: block;
+  margin-bottom: 1rem;
+}
+
+form label > input,
+form label > select {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.5rem 0.75rem;
+  background: #14171c;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font: inherit;
+}
+
+button,
+.btn {
+  padding: 0.5rem 1rem;
+  background: var(--accent);
+  color: #0b0d10;
+  border: 0;
+  border-radius: 6px;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--border);
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+}
+
+.error {
+  color: var(--danger);
+}
+
+.muted {
+  color: var(--muted);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+th,
+td {
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+th {
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.admin-nav {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 1.5rem;
+}
+
+.admin-nav a {
+  color: var(--fg);
+  text-decoration: none;
+}
+
+.admin-nav a:hover {
+  color: var(--link);
+}
+
+.admin-nav .spacer {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.row-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.badge-admin {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.badge-inactive {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.login-form {
+  max-width: 360px;
 }

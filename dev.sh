@@ -14,8 +14,29 @@ err()  { echo -e "${RED}[dev]${NC} $*"; exit 1; }
 if [ ! -f .env ]; then
   warn ".env не найден — копирую из .env.example"
   cp .env.example .env
-  warn "Проверь .env (особенно AUTH_SECRET) и запусти скрипт снова."
-  exit 0
+fi
+
+# 1a. AUTH_SECRET — если пустой, сгенерировать и подставить
+if grep -qE '^AUTH_SECRET=""' .env; then
+  warn "AUTH_SECRET пуст — генерирую"
+  SECRET=$(openssl rand -base64 32)
+  # Делитерами для sed берём `|`, чтобы не конфликтовать со слешами и плюсами в base64.
+  sed -i.bak "s|^AUTH_SECRET=\"\"|AUTH_SECRET=\"${SECRET}\"|" .env
+  rm -f .env.bak
+fi
+
+# 1b. ADMIN_INITIAL_PASSWORD — если пустой, сгенерировать (для первого сида)
+if grep -qE '^ADMIN_INITIAL_PASSWORD=""' .env; then
+  warn "ADMIN_INITIAL_PASSWORD пуст — генерирую"
+  PASS=$(openssl rand -base64 18 | tr -d '/+=' | head -c 16)
+  sed -i.bak "s|^ADMIN_INITIAL_PASSWORD=\"\"|ADMIN_INITIAL_PASSWORD=\"${PASS}\"|" .env
+  rm -f .env.bak
+  if grep -qE '^ADMIN_INITIAL_EMAIL=""' .env; then
+    sed -i.bak "s|^ADMIN_INITIAL_EMAIL=\"\"|ADMIN_INITIAL_EMAIL=\"admin@fastlanes.local\"|" .env
+    rm -f .env.bak
+  fi
+  warn "Логин для админки:"
+  grep -E '^ADMIN_INITIAL_(EMAIL|PASSWORD)=' .env | sed 's/^/        /'
 fi
 log ".env ✓"
 
@@ -28,10 +49,14 @@ log "node_modules ✓"
 
 # 3. Prisma
 log "Применяю схему Prisma..."
-npx prisma db push --skip-generate
+npx prisma migrate deploy 2>/dev/null || npx prisma db push --skip-generate
 npx prisma generate
 log "Prisma ✓"
 
-# 4. Next.js dev
+# 4. Seed (идемпотентно — если admin уже есть, no-op)
+log "Сид первого админа..."
+npx prisma db seed || warn "Seed упал — проверь ADMIN_INITIAL_* в .env"
+
+# 5. Next.js dev
 log "Запускаю Next.js dev сервер на http://localhost:3000"
 npm run dev
