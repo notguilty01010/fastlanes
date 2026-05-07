@@ -112,20 +112,15 @@
         group: "{{ app_user }}"
         mode: "0755"
 
-    - name: Check if repo already cloned
-      ansible.builtin.stat:
-        path: "{{ app_dir }}/.git"
-      register: git_dir
-
     - name: Initial git clone (if missing)
       become_user: "{{ app_user }}"
-      ansible.builtin.git:
-        repo: "{{ app_repo }}"
-        dest: "{{ app_dir }}"
-        version: main
-        depth: 1
-        update: false
-      when: not git_dir.stat.exists
+      ansible.builtin.shell: |
+        git init {{ app_dir }}
+        git -C {{ app_dir }} remote add origin {{ app_repo }}
+        git -C {{ app_dir }} fetch --depth 1 origin main
+        git -C {{ app_dir }} checkout main
+      args:
+        creates: "{{ app_dir }}/.git"
 
     - name: Render production .env
       ansible.builtin.template:
