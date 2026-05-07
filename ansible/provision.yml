@@ -103,7 +103,7 @@
         mode: "0440"
         validate: /usr/sbin/visudo -cf %s
 
-    # ---------- App directory + .env ----------
+    # ---------- App directory + repo + .env ----------
     - name: Create app directory
       ansible.builtin.file:
         path: "{{ app_dir }}"
@@ -111,14 +111,6 @@
         owner: "{{ app_user }}"
         group: "{{ app_user }}"
         mode: "0755"
-
-    - name: Render production .env
-      ansible.builtin.template:
-        src: templates/env.j2
-        dest: "{{ app_dir }}/.env"
-        owner: "{{ app_user }}"
-        group: "{{ app_user }}"
-        mode: "0600"
 
     - name: Check if repo already cloned
       ansible.builtin.stat:
@@ -134,6 +126,14 @@
         depth: 1
         update: false
       when: not git_dir.stat.exists
+
+    - name: Render production .env
+      ansible.builtin.template:
+        src: templates/env.j2
+        dest: "{{ app_dir }}/.env"
+        owner: "{{ app_user }}"
+        group: "{{ app_user }}"
+        mode: "0600"
 
     # ---------- systemd ----------
     - name: Install fastlanes systemd unit
