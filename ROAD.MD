@@ -122,7 +122,7 @@ created_at
 
 * `create-next-app` с TypeScript и App Router;
 * настроить ESLint + Prettier;
-* подключить Prisma + PostgreSQL локально;
+* подключить Prisma + SQLite локально;
 * создать первую миграцию (пустую или с `User`);
 * добавить `.env` / `.env.example`;
 * health-check endpoint `GET /api/health` (возвращает статус БД);

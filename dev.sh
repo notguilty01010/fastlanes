@@ -26,35 +26,12 @@ if [ ! -d node_modules ]; then
 fi
 log "node_modules ✓"
 
-# 3. PostgreSQL
-PG_BIN="/c/Program Files/PostgreSQL/17/bin"
-export PATH="$PG_BIN:$PATH"
-
-log "Проверяю PostgreSQL..."
-if ! pg_isready -q 2>/dev/null; then
-  warn "PostgreSQL не отвечает — пробую запустить сервис..."
-  powershell.exe -Command "Start-Service 'postgresql-x64-17'" 2>/dev/null || true
-  sleep 3
-  if ! pg_isready -q 2>/dev/null; then
-    err "PostgreSQL не запустился. Открой PowerShell от администратора и выполни:
-  Start-Service postgresql-x64-17
-  Set-Service postgresql-x64-17 -StartupType Automatic"
-  fi
-fi
-log "PostgreSQL ✓"
-
-# 4. Создать БД если не существует
-DB_NAME=$(grep DATABASE_URL .env | grep -oP '(?<=/)[^/?]+(?=\?)' | head -1)
-DB_NAME=${DB_NAME:-fastlanes}
-psql -U postgres -tc "SELECT 1 FROM pg_database WHERE datname='${DB_NAME}'" \
-  | grep -q 1 || psql -U postgres -c "CREATE DATABASE ${DB_NAME};" && log "БД '${DB_NAME}' ✓"
-
-# 5. Prisma
+# 3. Prisma
 log "Применяю схему Prisma..."
 npx prisma db push --skip-generate
 npx prisma generate
 log "Prisma ✓"
 
-# 6. Next.js dev
+# 4. Next.js dev
 log "Запускаю Next.js dev сервер на http://localhost:3000"
 npm run dev
