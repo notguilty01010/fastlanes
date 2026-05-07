@@ -28,12 +28,9 @@
         update: true
 
     - name: Re-render .env (на случай ротации секретов)
-      become: true
       ansible.builtin.template:
         src: templates/env.j2
         dest: "{{ app_dir }}/.env"
-        owner: "{{ app_user }}"
-        group: "{{ app_user }}"
         mode: "0600"
 
     - name: npm ci
