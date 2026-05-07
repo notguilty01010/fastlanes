@@ -120,6 +120,11 @@
         group: "{{ app_user }}"
         mode: "0600"
 
+    - name: Check if repo already cloned
+      ansible.builtin.stat:
+        path: "{{ app_dir }}/.git"
+      register: git_dir
+
     - name: Initial git clone (if missing)
       become_user: "{{ app_user }}"
       ansible.builtin.git:
@@ -128,6 +133,7 @@
         version: main
         depth: 1
         update: false
+      when: not git_dir.stat.exists
 
     # ---------- systemd ----------
     - name: Install fastlanes systemd unit
