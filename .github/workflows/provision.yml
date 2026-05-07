@@ -21,7 +21,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y ansible
-          ansible-galaxy collection install community.general community.postgresql ansible.posix
+          ansible-galaxy collection install community.general ansible.posix
 
       - name: Configure SSH
         env:

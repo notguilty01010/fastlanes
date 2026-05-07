@@ -17,7 +17,7 @@
 ## 2. Стек
 
 * Framework: **Next.js (App Router) + TypeScript** — фронт и API в одном проекте
-* Database: PostgreSQL
+* Database: SQLite (файл `fastlanes.db` в директории приложения)
 * ORM / migrations: Prisma
 * Auth: Auth.js (NextAuth)
 * Map: Leaflet + OpenStreetMap
@@ -144,7 +144,7 @@ created_at
 
 * обновить систему, поставить базовые пакеты;
 * установить Node.js (LTS) и npm;
-* установить и настроить PostgreSQL, создать БД и пользователя;
+* убедиться, что директория приложения существует и принадлежит `deploy` (SQLite-файл создаётся там автоматически при первом `prisma migrate deploy`);
 * установить Nginx, настроить reverse proxy на `localhost:3000`;
 * выпустить SSL через certbot для `fastlanes.pp.ua`;
 * создать системного пользователя `deploy` с ssh-ключом;
@@ -163,7 +163,7 @@ Workflow на push в `main`:
 * `systemctl restart fastlanes`;
 * проверка `/api/health` после рестарта.
 
-Секреты в GitHub: `SSH_HOST`, `SSH_USER`, `SSH_KEY`, `DATABASE_URL`.
+Секреты в GitHub: `SSH_HOST`, `SSH_PRIVATE_KEY`, `ANSIBLE_VAULT_PASSWORD`.
 
 Результат:
 
