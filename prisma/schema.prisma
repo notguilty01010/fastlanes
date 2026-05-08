@@ -1,5 +1,4 @@
 // Prisma schema for FastLanes Logistics Tracker.
-// Stage 1: только User. Остальные сущности добавятся в следующих этапах.
 
 generator client {
   provider = "prisma-client-js"
@@ -15,6 +14,19 @@ enum Role {
   manager
 }
 
+enum ShipmentStatus {
+  created
+  waiting
+  in_transit
+  delivered
+  cancelled
+}
+
+enum TrackerStatus {
+  active
+  disabled
+}
+
 model User {
   id           String   @id @default(cuid())
   name         String
@@ -24,5 +36,57 @@ model User {
   isActive     Boolean  @default(true) @map("is_active")
   createdAt    DateTime @default(now()) @map("created_at")
 
+  shipments Shipment[] @relation("ShipmentManager")
+
   @@map("users")
+}
+
+model Shipment {
+  id          String         @id @default(cuid())
+  title       String
+  description String?
+  status      ShipmentStatus @default(created)
+  origin      String
+  destination String
+  managerId   String?        @map("manager_id")
+  createdAt   DateTime       @default(now()) @map("created_at")
+  updatedAt   DateTime       @updatedAt @map("updated_at")
+
+  manager  User?     @relation("ShipmentManager", fields: [managerId], references: [id], onDelete: SetNull)
+  trackers Tracker[]
+
+  @@index([status])
+  @@index([managerId])
+  @@map("shipments")
+}
+
+model Tracker {
+  id         String        @id @default(cuid())
+  shipmentId String        @map("shipment_id")
+  token      String        @unique
+  status     TrackerStatus @default(active)
+  expiresAt  DateTime?     @map("expires_at")
+  createdAt  DateTime      @default(now()) @map("created_at")
+  updatedAt  DateTime      @updatedAt @map("updated_at")
+
+  shipment Shipment        @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  points   LocationPoint[]
+
+  @@index([shipmentId])
+  @@map("trackers")
+}
+
+model LocationPoint {
+  id        String   @id @default(cuid())
+  trackerId String   @map("tracker_id")
+  latitude  Float
+  longitude Float
+  accuracy  Float?
+  speed     Float?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  tracker Tracker @relation(fields: [trackerId], references: [id], onDelete: Cascade)
+
+  @@index([trackerId, createdAt])
+  @@map("location_points")
 }
