@@ -135,17 +135,41 @@
         name: "{{ service_name }}"
         enabled: true
 
-    # ---------- Nginx ----------
+    # ---------- Nginx + Let's Encrypt ----------
+    # Конфиг nginx целиком управляется этим шаблоном (никаких --nginx-плагинов
+    # certbot, иначе они будут править файл и драться с ансиблом). Шаблон условно
+    # включает 443-блок только если сертификат уже выпущен — поэтому первый
+    # провижн идёт двумя проходами: сначала HTTP-only (чтобы ACME challenge
+    # прошёл), потом certbot certonly --webroot, потом перерендер с SSL.
     - name: Install Nginx
       ansible.builtin.apt:
         name: nginx
         state: present
 
-    - name: Render Nginx site
+    - name: Install certbot
+      ansible.builtin.apt:
+        name:
+          - certbot
+        state: present
+
+    - name: Ensure ACME webroot exists
+      ansible.builtin.file:
+        path: /var/www/html
+        state: directory
+        mode: "0755"
+
+    - name: Stat Let's Encrypt cert
+      ansible.builtin.stat:
+        path: "/etc/letsencrypt/live/{{ domain }}/fullchain.pem"
+      register: le_cert
+
+    - name: Render Nginx site (HTTP-only on first provision, full HTTPS otherwise)
       ansible.builtin.template:
         src: templates/nginx-fastlanes.conf.j2
         dest: "/etc/nginx/sites-available/{{ domain }}"
         mode: "0644"
+      vars:
+        cert_exists: "{{ le_cert.stat.exists }}"
       notify: Reload nginx
 
     - name: Enable Nginx site
@@ -168,22 +192,43 @@
         state: started
         enabled: true
 
-    # ---------- Let's Encrypt ----------
-    - name: Install certbot
-      ansible.builtin.apt:
-        name:
-          - certbot
-          - python3-certbot-nginx
-        state: present
+    # nginx должен быть жив и обслуживать HTTP до запроса certbot — поэтому
+    # принудительно прогоняем хендлер reload до certonly.
+    - name: Flush handlers before cert issuance
+      ansible.builtin.meta: flush_handlers
 
-    - name: Issue Let's Encrypt cert
+    - name: Issue Let's Encrypt cert (webroot, no nginx plugin)
       ansible.builtin.command: >-
-        certbot --nginx -n --agree-tos
+        certbot certonly --webroot -w /var/www/html -n --agree-tos
         --email {{ letsencrypt_email }}
         -d {{ domain }}
       args:
         creates: "/etc/letsencrypt/live/{{ domain }}/fullchain.pem"
+
+    - name: Re-stat cert after issuance
+      ansible.builtin.stat:
+        path: "/etc/letsencrypt/live/{{ domain }}/fullchain.pem"
+      register: le_cert_after
+
+    - name: Render Nginx site with HTTPS block
+      ansible.builtin.template:
+        src: templates/nginx-fastlanes.conf.j2
+        dest: "/etc/nginx/sites-available/{{ domain }}"
+        mode: "0644"
+      vars:
+        cert_exists: "{{ le_cert_after.stat.exists }}"
       notify: Reload nginx
+
+    # Renewal hook: certbot.timer (ставится apt-пакетом, включён by default)
+    # сам гоняет renew дважды в сутки, но не знает про nginx — без хука
+    # обновлённый сертификат не подхватится до рестарта.
+    - name: Install certbot deploy-hook to reload nginx
+      ansible.builtin.copy:
+        dest: /etc/letsencrypt/renewal-hooks/deploy/reload-nginx.sh
+        content: |
+          #!/bin/sh
+          systemctl reload nginx
+        mode: "0755"
 
   handlers:
     - name: Reload systemd
