@@ -22,7 +22,7 @@
 - Auth: Auth.js (NextAuth)
 - Map: Leaflet + OpenStreetMap
 - Server: VPS + Nginx + Let's Encrypt (SSL обязателен — без него `navigator.geolocation` не работает на проде)
-- Process manager: systemd (`next start`)
+- Process manager: systemd (Next.js standalone, `node server.js`)
 - Deploy: GitHub Actions → SSH на сервер
 - Server provisioning: Ansible
 - Domain: `fastlanes.pp.ua`
@@ -138,30 +138,44 @@ created_at
 
 Поднять прод **до** написания фич — каждая следующая фича сразу попадает на сервер.
 
-### Ansible playbook
+### Ansible playbooks
 
-Должен:
+`provision.yml` (раз на свежем VPS, через `workflow_dispatch`):
 
 - обновить систему, поставить базовые пакеты;
 - установить Node.js (LTS) и npm;
-- убедиться, что директория приложения существует и принадлежит `deploy` (SQLite-файл создаётся там автоматически при первом `prisma migrate deploy`);
-- установить Nginx, настроить reverse proxy на `localhost:3000`;
-- выпустить SSL через certbot для `fastlanes.pp.ua`;
+- настроить firewall, Nginx + reverse proxy на `localhost:3000`, certbot/SSL;
 - создать системного пользователя `deploy` с ssh-ключом;
-- создать systemd unit для `next start`;
-- подготовить директорию `/var/www/fastlanes` с правами на `deploy`.
+- создать systemd unit (запускает `node server.js` из `current/`);
+- подготовить структуру `/var/www/fastlanes/{releases/, fastlanes.db}`.
+
+`deploy.yml` (на каждый push в `main`, артефакт-релизы):
+
+- распаковать tar.gz из CI в `releases/<tag>/`;
+- отрендерить `.env`;
+- `npx prisma@<version> migrate deploy`;
+- переключить симлинк `current → releases/<tag>`;
+- `systemctl restart fastlanes`;
+- проверить `/api/health`;
+- удалить старые релизы, оставив 3.
+
+`bootstrap-admin.yml` (одноразово через workflow_dispatch): запускает `node prisma/seed.mjs` из `current/`. Идемпотентен.
 
 ### GitHub Actions
 
-Workflow на push в `main`:
+Workflow на push в `main` (`.github/workflows/deploy.yml`):
 
-- ssh-подключение к серверу под `deploy`;
-- `git pull`;
-- `npm ci`;
-- `npx prisma migrate deploy`;
-- `npm run build`;
-- `systemctl restart fastlanes`;
-- проверка `/api/health` после рестарта.
+**Job `build`** (на runner'е):
+- `npm ci` (со всеми deps);
+- `npm run build` (Next standalone);
+- собирает бандл (`public/`, `.next/static/`, `prisma/{schema,migrations,seed.mjs}` подкладываются в `.next/standalone/`);
+- упаковывает в `fastlanes-build.tar.gz` → upload-artifact.
+
+**Job `deploy`**:
+- скачивает артефакт;
+- запускает `ansible-playbook deploy.yml` с `-e artifact_path=...`, `release_tag=...`, `prisma_version=...`.
+
+На сервере **никогда** не запускаются `npm ci`, `next build`, не лежат devDependencies.
 
 Секреты в GitHub: `SSH_HOST`, `SSH_PRIVATE_KEY`, `ANSIBLE_VAULT_PASSWORD`.
 
@@ -182,8 +196,8 @@ Auth.js (NextAuth v5) с Credentials provider:
   [src/auth.config.ts](src/auth.config.ts), без Prisma;
 - полный конфиг с Prisma `authorize` — в [src/auth.ts](src/auth.ts);
 - проверка роли на сервере — `requireAdmin()` / `requireUser()` в [src/lib/auth-helpers.ts](src/lib/auth-helpers.ts);
-- первый админ создаётся через `prisma db seed` ([prisma/seed.ts](prisma/seed.ts)),
-  идемпотентно: если в БД уже есть admin — no-op.
+- первый админ создаётся одноразовым плейбуком [ansible/bootstrap-admin.yml](ansible/bootstrap-admin.yml),
+  который запускает [prisma/seed.mjs](prisma/seed.mjs); идемпотентно — если в БД уже есть admin, no-op.
 
 Результат:
 
@@ -304,7 +318,7 @@ POST /api/track/{token}/location
 
 Лимитер хранится на `globalThis` ради HMR в dev'е и переживает hot-reload.
 Под кластер из нескольких инстансов потребуется Redis — для MVP с одним
-`next start` под systemd текущая реализация достаточна.
+Next.js standalone (`node server.js`) под systemd текущая реализация достаточна.
 
 Результат:
 

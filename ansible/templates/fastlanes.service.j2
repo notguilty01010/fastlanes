@@ -1,19 +1,21 @@
 [Unit]
-Description=FastLanes Next.js app
+Description=FastLanes Next.js app (standalone)
 After=network.target
 
 [Service]
 Type=simple
 User={{ app_user }}
 Group={{ app_user }}
-WorkingDirectory={{ app_dir }}
-EnvironmentFile={{ app_dir }}/.env
-ExecStart=/usr/bin/npm run start
+# current — симлинк на активный релиз. После switch-симлинка
+# рестарт службы поднимет уже новый код.
+WorkingDirectory={{ app_dir }}/current
+EnvironmentFile={{ app_dir }}/current/.env
+ExecStart=/usr/bin/node server.js
 Restart=on-failure
 RestartSec=5
-# 0.0.0.0 не нужен — Nginx ходит на localhost.
+# Стандартные env'ы Next.js standalone-сервера.
 Environment=PORT=3000
-Environment=HOST=127.0.0.1
+Environment=HOSTNAME=127.0.0.1
 Environment=NODE_ENV=production
 
 # Безопасность

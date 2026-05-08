@@ -1,65 +1,88 @@
 ---
-# Раскатка приложения. Запускается из CI на push в main.
-# Подключаемся под deploy-юзером (provision его уже создал).
+# Деплой готового артефакта (собран в CI). На сервере НЕ собираем и НЕ держим
+# devDependencies — едет только standalone-бандл Next.js + node_modules только
+# с runtime-зависимостями.
+#
+# Схема Capistrano-style:
+#   {{ app_dir }}/
+#     fastlanes.db            # БД, переживает релизы
+#     current -> releases/<tag>
+#     releases/
+#       <tag>/                # распакованный standalone-бандл
+#         server.js
+#         node_modules/
+#         prisma/{schema.prisma, migrations/}
+#         .env                # отрендерен из vault
+#
+# Параметры (передаются через -e):
+#   artifact_path   — путь к tar.gz на runner'е CI
+#   release_tag     — уникальный идентификатор релиза (e.g. 20260508-abc1234)
+#   prisma_version  — версия prisma CLI для `npx prisma@x migrate deploy`
 
 - name: Deploy FastLanes
   hosts: fastlanes
   gather_facts: false
   remote_user: deploy
 
+  vars:
+    releases_dir: "{{ app_dir }}/releases"
+    release_dir: "{{ releases_dir }}/{{ release_tag }}"
+    current_link: "{{ app_dir }}/current"
+    keep_releases: 3
+
   tasks:
-    - name: Ensure app dir is a git repo
-      ansible.builtin.stat:
-        path: "{{ app_dir }}/.git"
-      register: app_git
+    - name: Validate inputs
+      ansible.builtin.assert:
+        that:
+          - artifact_path is defined
+          - release_tag is defined
+          - prisma_version is defined
+        fail_msg: "Передай artifact_path, release_tag и prisma_version через -e"
 
-    - name: Fail if provision wasn't run
-      ansible.builtin.fail:
-        msg: "{{ app_dir }} не клонирован — запусти provision.yml"
-      when: not app_git.stat.exists
+    - name: Ensure app_dir exists
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+        mode: "0755"
 
-    - name: Pull latest main
-      ansible.builtin.git:
-        repo: "{{ app_repo }}"
-        dest: "{{ app_dir }}"
-        version: main
-        depth: 1
-        force: true
-        update: true
+    - name: Ensure releases dir exists
+      ansible.builtin.file:
+        path: "{{ releases_dir }}"
+        state: directory
+        mode: "0755"
 
-    - name: Re-render .env (на случай ротации секретов)
+    - name: Create release dir
+      ansible.builtin.file:
+        path: "{{ release_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Upload + unpack artifact
+      ansible.builtin.unarchive:
+        src: "{{ artifact_path }}"
+        dest: "{{ release_dir }}"
+        remote_src: false
+
+    - name: Render release .env
       ansible.builtin.template:
         src: templates/env.j2
-        dest: "{{ app_dir }}/.env"
+        dest: "{{ release_dir }}/.env"
         mode: "0600"
-
-    - name: npm ci
-      ansible.builtin.command:
-        cmd: npm ci --no-audit --no-fund
-        chdir: "{{ app_dir }}"
-      environment:
-        NODE_ENV: production
-      changed_when: true
 
     - name: prisma migrate deploy
       ansible.builtin.command:
-        cmd: npx prisma migrate deploy
-        chdir: "{{ app_dir }}"
-      changed_when: true
-
-    - name: prisma db seed (создаёт первого админа, если его нет)
-      ansible.builtin.command:
-        cmd: npx prisma db seed
-        chdir: "{{ app_dir }}"
-      changed_when: true
-
-    - name: next build
-      ansible.builtin.command:
-        cmd: npm run build
-        chdir: "{{ app_dir }}"
+        cmd: "npx --yes prisma@{{ prisma_version }} migrate deploy"
+        chdir: "{{ release_dir }}"
       environment:
-        NODE_ENV: production
+        DATABASE_URL: "file:{{ app_dir }}/fastlanes.db"
       changed_when: true
+
+    - name: Switch current symlink
+      ansible.builtin.file:
+        src: "{{ release_dir }}"
+        dest: "{{ current_link }}"
+        state: link
+        force: true
 
     - name: Restart fastlanes service
       ansible.builtin.command: sudo /bin/systemctl restart {{ service_name }}
@@ -80,3 +103,18 @@
     - name: Show health response
       ansible.builtin.debug:
         var: health.json
+
+    - name: List all releases
+      ansible.builtin.find:
+        paths: "{{ releases_dir }}"
+        file_type: directory
+      register: all_releases
+
+    - name: Prune old releases (keep last {{ keep_releases }})
+      ansible.builtin.file:
+        path: "{{ item.path }}"
+        state: absent
+      loop: "{{ (all_releases.files | sort(attribute='mtime', reverse=true))[keep_releases:] }}"
+      when: all_releases.files | length > keep_releases
+      loop_control:
+        label: "{{ item.path | basename }}"

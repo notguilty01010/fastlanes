@@ -103,7 +103,9 @@
         mode: "0440"
         validate: /usr/sbin/visudo -cf %s
 
-    # ---------- App directory + repo + .env ----------
+    # ---------- App directory ----------
+    # Код приложения и .env приезжают релизами в {{ app_dir }}/releases/<tag>/
+    # из CI (см. ansible/deploy.yml). Здесь только готовим структуру каталогов.
     - name: Create app directory
       ansible.builtin.file:
         path: "{{ app_dir }}"
@@ -112,23 +114,13 @@
         group: "{{ app_user }}"
         mode: "0755"
 
-    - name: Initial git clone (if missing)
-      become_user: "{{ app_user }}"
-      ansible.builtin.shell: |
-        git init {{ app_dir }}
-        git -C {{ app_dir }} remote add origin {{ app_repo }}
-        git -C {{ app_dir }} fetch --depth 1 origin main
-        git -C {{ app_dir }} checkout main
-      args:
-        creates: "{{ app_dir }}/.git"
-
-    - name: Render production .env
-      ansible.builtin.template:
-        src: templates/env.j2
-        dest: "{{ app_dir }}/.env"
+    - name: Create releases directory
+      ansible.builtin.file:
+        path: "{{ app_dir }}/releases"
+        state: directory
         owner: "{{ app_user }}"
         group: "{{ app_user }}"
-        mode: "0600"
+        mode: "0755"
 
     # ---------- systemd ----------
     - name: Install fastlanes systemd unit

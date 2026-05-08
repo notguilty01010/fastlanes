@@ -8,18 +8,17 @@ nodejs_major: "20"
 
 app_dir: /var/www/fastlanes
 app_user: deploy
-app_repo: "https://github.com/notguilty01010/fastlanes.git"
 
 service_name: fastlanes
 
 # Эти переменные приходят из vault.yml:
 #   vault_auth_secret
-#   vault_admin_initial_email     (опционально, для сидинга первого админа)
-#   vault_admin_initial_password  (опционально, для сидинга первого админа)
+#   vault_admin_initial_email     (опционально, для бутстрапа первого админа)
+#   vault_admin_initial_password  (опционально, для бутстрапа первого админа)
 #   vault_admin_initial_name      (опционально)
 #
-# Сид (`npx prisma db seed`) идемпотентен: если в БД уже есть admin,
-# переменные игнорируются.
+# Бутстрап админа (`ansible/bootstrap-admin.yml`) идемпотентен: если в БД
+# уже есть admin — переменные игнорируются.
 
 auth_secret: "{{ vault_auth_secret }}"
 admin_initial_email: "{{ vault_admin_initial_email | default('') }}"

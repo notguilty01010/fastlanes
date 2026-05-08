@@ -10,7 +10,64 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  build:
+    name: Build artifact
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      release_tag: ${{ steps.meta.outputs.release_tag }}
+      prisma_version: ${{ steps.meta.outputs.prisma_version }}
+
+    steps:
+      - uses: actions/checkout@v4.2.2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci --no-audit --no-fund
+
+      - name: Build Next.js (standalone)
+        run: npm run build
+        env:
+          NEXT_TELEMETRY_DISABLED: "1"
+
+      - name: Assemble standalone bundle
+        run: |
+          set -euo pipefail
+          # Next standalone сам не копирует public/ и .next/static/.
+          cp -R public        .next/standalone/public
+          cp -R .next/static  .next/standalone/.next/static
+          # Схема + миграции — нужны для `prisma migrate deploy` на сервере.
+          mkdir -p             .next/standalone/prisma
+          cp -R prisma/schema.prisma prisma/migrations .next/standalone/prisma/
+          # Сид (plain ESM, без tsx). Запускается отдельным плейбуком.
+          cp prisma/seed.mjs   .next/standalone/prisma/seed.mjs
+
+      - name: Pack artifact
+        run: tar -C .next/standalone -czf fastlanes-build.tar.gz .
+
+      - name: Compute release metadata
+        id: meta
+        run: |
+          set -euo pipefail
+          tag="$(date -u +%Y%m%d%H%M%S)-${GITHUB_SHA::7}"
+          prisma_version="$(node -e "const p=require('./package.json').devDependencies.prisma; process.stdout.write(p.replace(/^[\^~]/,''))")"
+          echo "release_tag=$tag"               >> "$GITHUB_OUTPUT"
+          echo "prisma_version=$prisma_version" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fastlanes-build
+          path: fastlanes-build.tar.gz
+          retention-days: 7
+          if-no-files-found: error
+
   deploy:
+    name: Deploy to VPS
+    needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 15
     environment:
@@ -19,6 +76,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4.2.2
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: fastlanes-build
+          path: ${{ runner.temp }}
 
       - name: Install Ansible
         run: |
@@ -49,6 +111,9 @@ jobs:
           ansible-playbook \
             --vault-password-file "$HOME/.vault_pass" \
             --private-key ~/.ssh/id_ed25519 \
+            -e "artifact_path=${{ runner.temp }}/fastlanes-build.tar.gz" \
+            -e "release_tag=${{ needs.build.outputs.release_tag }}" \
+            -e "prisma_version=${{ needs.build.outputs.prisma_version }}" \
             deploy.yml
 
       - name: Cleanup secrets
