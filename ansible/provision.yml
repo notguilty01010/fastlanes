@@ -136,11 +136,12 @@
         enabled: true
 
     # ---------- Nginx + Let's Encrypt ----------
-    # Конфиг nginx целиком управляется этим шаблоном (никаких --nginx-плагинов
-    # certbot, иначе они будут править файл и драться с ансиблом). Шаблон условно
-    # включает 443-блок только если сертификат уже выпущен — поэтому первый
-    # провижн идёт двумя проходами: сначала HTTP-only (чтобы ACME challenge
-    # прошёл), потом certbot certonly --webroot, потом перерендер с SSL.
+    # Паттерн: dummy-cert bootstrap (как в mars-arena-devops/ansible/infra-deploy.yml).
+    # nginx-шаблон всегда содержит полный SSL-блок — никаких jinja-условий и
+    # двух режимов рендеринга. Чтобы nginx прошёл валидацию до выпуска реального
+    # сертификата, кладём self-signed заглушку по тем же путям. Потом
+    # `certbot certonly --webroot` перезаписывает её настоящим LE-сертификатом
+    # и nginx reload подхватывает его.
     - name: Install Nginx
       ansible.builtin.apt:
         name: nginx
@@ -158,18 +159,32 @@
         state: directory
         mode: "0755"
 
-    - name: Stat Let's Encrypt cert
-      ansible.builtin.stat:
-        path: "/etc/letsencrypt/live/{{ domain }}/fullchain.pem"
-      register: le_cert
+    - name: Ensure Let's Encrypt live dir exists
+      ansible.builtin.file:
+        path: "/etc/letsencrypt/live/{{ domain }}"
+        state: directory
+        mode: "0700"
 
-    - name: Render Nginx site (HTTP-only on first provision, full HTTPS otherwise)
+    - name: Check whether real LE cert is already provisioned
+      ansible.builtin.stat:
+        path: "/etc/letsencrypt/renewal/{{ domain }}.conf"
+      register: le_renewal_conf
+
+    - name: Generate self-signed dummy cert (bootstrap, only if no real cert)
+      ansible.builtin.command: >-
+        openssl req -x509 -nodes -newkey rsa:2048 -days 1
+        -keyout /etc/letsencrypt/live/{{ domain }}/privkey.pem
+        -out /etc/letsencrypt/live/{{ domain }}/fullchain.pem
+        -subj "/CN={{ domain }}"
+      args:
+        creates: "/etc/letsencrypt/live/{{ domain }}/fullchain.pem"
+      when: not le_renewal_conf.stat.exists
+
+    - name: Render Nginx site
       ansible.builtin.template:
         src: templates/nginx-fastlanes.conf.j2
         dest: "/etc/nginx/sites-available/{{ domain }}"
         mode: "0644"
-      vars:
-        cert_exists: "{{ le_cert.stat.exists }}"
       notify: Reload nginx
 
     - name: Enable Nginx site
@@ -192,31 +207,28 @@
         state: started
         enabled: true
 
-    # nginx должен быть жив и обслуживать HTTP до запроса certbot — поэтому
-    # принудительно прогоняем хендлер reload до certonly.
+    # nginx уже слушает :80 с dummy-сертификатом; теперь reload до certbot,
+    # чтобы ACME challenge видел свежий конфиг.
     - name: Flush handlers before cert issuance
       ansible.builtin.meta: flush_handlers
 
-    - name: Issue Let's Encrypt cert (webroot, no nginx plugin)
+    # certbot создаёт в /etc/letsencrypt/live/<domain>/ симлинки на
+    # /etc/letsencrypt/archive/<domain>/. Если там лежат обычные файлы (наш
+    # dummy), он создаст новую lineage с суффиксом '-0001' — сломает пути
+    # из nginx-конфига. Поэтому перед issue зачищаем dummy.
+    - name: Remove dummy cert dir before first issuance
+      ansible.builtin.file:
+        path: "/etc/letsencrypt/live/{{ domain }}"
+        state: absent
+      when: not le_renewal_conf.stat.exists
+
+    - name: Issue Let's Encrypt cert via webroot
       ansible.builtin.command: >-
         certbot certonly --webroot -w /var/www/html -n --agree-tos
         --email {{ letsencrypt_email }}
         -d {{ domain }}
       args:
-        creates: "/etc/letsencrypt/live/{{ domain }}/fullchain.pem"
-
-    - name: Re-stat cert after issuance
-      ansible.builtin.stat:
-        path: "/etc/letsencrypt/live/{{ domain }}/fullchain.pem"
-      register: le_cert_after
-
-    - name: Render Nginx site with HTTPS block
-      ansible.builtin.template:
-        src: templates/nginx-fastlanes.conf.j2
-        dest: "/etc/nginx/sites-available/{{ domain }}"
-        mode: "0644"
-      vars:
-        cert_exists: "{{ le_cert_after.stat.exists }}"
+        creates: "/etc/letsencrypt/renewal/{{ domain }}.conf"
       notify: Reload nginx
 
     # Renewal hook: certbot.timer (ставится apt-пакетом, включён by default)

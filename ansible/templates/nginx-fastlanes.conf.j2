@@ -1,4 +1,4 @@
-# HTTP — нужен для ACME-challenge (webroot) и редиректа на HTTPS.
+# HTTP — ACME-challenge (webroot) и редирект на HTTPS.
 server {
     listen 80;
     listen [::]:80;
@@ -8,27 +8,11 @@ server {
         root /var/www/html;
     }
 
-{% if cert_exists | default(false) %}
     location / {
         return 301 https://$host$request_uri;
     }
-{% else %}
-    # Сертификата ещё нет (первый провижн). Проксируем на app, чтобы /api/health
-    # отвечал; certbot выпустит cert и шаблон будет перерендерен с 443-блоком.
-    location / {
-        proxy_pass http://127.0.0.1:3000;
-        proxy_http_version 1.1;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-{% endif %}
-
-    client_max_body_size 5M;
 }
 
-{% if cert_exists | default(false) %}
 server {
     listen 443 ssl;
     listen [::]:443 ssl;
@@ -38,8 +22,7 @@ server {
     ssl_certificate /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/{{ domain }}/privkey.pem;
 
-    # Современные дефолты (то, что обычно даёт certbot-nginx плагин,
-    # инлайним сюда — пакет python3-certbot-nginx нам не нужен).
+    # TLS-параметры инлайн — пакет python3-certbot-nginx нам не нужен.
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers off;
     ssl_session_cache shared:SSL:10m;
@@ -64,4 +47,3 @@ server {
 
     client_max_body_size 5M;
 }
-{% endif %}
