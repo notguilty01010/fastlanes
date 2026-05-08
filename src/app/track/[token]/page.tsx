@@ -1,20 +1,13 @@
 import { notFound } from "next/navigation";
 
 import { prisma } from "@/lib/prisma";
+import { SHIPMENT_STATUS_LABEL } from "@/lib/shipment-status";
 import { TrackClient } from "./track-client";
 
 export const dynamic = "force-dynamic";
 
 export const metadata = {
   title: "Передача геолокації — FastLanes",
-};
-
-const STATUS_LABEL: Record<string, string> = {
-  created: "створено",
-  waiting: "очікує",
-  in_transit: "у дорозі",
-  delivered: "доставлено",
-  cancelled: "скасовано",
 };
 
 export default async function TrackPage({ params }: { params: Promise<{ token: string }> }) {
@@ -43,7 +36,7 @@ export default async function TrackPage({ params }: { params: Promise<{ token: s
         <p className="muted">
           {tracker.shipment.origin} → <strong>{tracker.shipment.destination}</strong>
         </p>
-        <p className="muted">статус: {STATUS_LABEL[tracker.shipment.status] ?? tracker.shipment.status}</p>
+        <p className="muted">статус: {SHIPMENT_STATUS_LABEL[tracker.shipment.status]}</p>
       </header>
 
       {isDisabled ? (

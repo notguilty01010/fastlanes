@@ -2,16 +2,9 @@ import Link from "next/link";
 
 import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
+import { SHIPMENT_STATUS_LABEL } from "@/lib/shipment-status";
 
 export const dynamic = "force-dynamic";
-
-const STATUS_LABEL: Record<string, string> = {
-  created: "створено",
-  waiting: "очікує",
-  in_transit: "у дорозі",
-  delivered: "доставлено",
-  cancelled: "скасовано",
-};
 
 export default async function ShipmentsPage() {
   await requireAdmin();
@@ -53,7 +46,7 @@ export default async function ShipmentsPage() {
                 </td>
                 <td>
                   <span className={`badge badge-status-${s.status}`}>
-                    {STATUS_LABEL[s.status] ?? s.status}
+                    {SHIPMENT_STATUS_LABEL[s.status]}
                   </span>
                 </td>
                 <td className="muted">{s.manager ? s.manager.name : "—"}</td>

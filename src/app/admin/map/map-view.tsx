@@ -6,7 +6,8 @@ import L from "leaflet";
 
 import "leaflet/dist/leaflet.css";
 
-import type { ActiveLocation } from "@/app/api/shipments/active-locations/route";
+import type { ActiveLocation } from "@/lib/active-location";
+import { SHIPMENT_STATUS_LABEL } from "@/lib/shipment-status";
 
 // Default Leaflet icon ссылается на ассеты из CDN/`./images/` — при сборке Next ломается.
 // Делаем свою маленькую иконку через divIcon, без растровых ассетов.
@@ -60,7 +61,7 @@ export function MapView({ points }: { points: ActiveLocation[] }) {
               {p.origin} → {p.destination}
             </span>
             <br />
-            <span>статус: {p.status}</span>
+            <span>статус: {SHIPMENT_STATUS_LABEL[p.status]}</span>
             <br />
             <span>
               координати: {p.latitude.toFixed(5)}, {p.longitude.toFixed(5)}

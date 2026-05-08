@@ -2,13 +2,11 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { ShipmentStatus } from "@prisma/client";
 import { z } from "zod";
 
 import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
-
-const SHIPMENT_STATUSES = ["created", "waiting", "in_transit", "delivered", "cancelled"] as const;
+import { SHIPMENT_STATUSES } from "@/lib/shipment-status";
 
 const baseSchema = z.object({
   title: z.string().min(1, "Введіть назву").max(200),
@@ -80,7 +78,7 @@ export async function createShipmentAction(
       description: parsed.data.description,
       origin: parsed.data.origin,
       destination: parsed.data.destination,
-      status: parsed.data.status as ShipmentStatus,
+      status: parsed.data.status,
       managerId: parsed.data.managerId ?? session.user.id,
     },
   });
@@ -108,7 +106,7 @@ export async function updateShipmentAction(
       description: parsed.data.description,
       origin: parsed.data.origin,
       destination: parsed.data.destination,
-      status: parsed.data.status as ShipmentStatus,
+      status: parsed.data.status,
       managerId: parsed.data.managerId,
     },
   });
@@ -127,7 +125,7 @@ export async function setShipmentStatusAction(formData: FormData) {
 
   await prisma.shipment.update({
     where: { id },
-    data: { status: status as ShipmentStatus },
+    data: { status: status as (typeof SHIPMENT_STATUSES)[number] },
   });
 
   revalidatePath("/admin/shipments");

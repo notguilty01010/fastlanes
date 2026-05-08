@@ -41,7 +41,6 @@ jobs:
       - name: Run provision playbook
         working-directory: ansible
         env:
-          ANSIBLE_VAULT_PASSWORD_FILE: ${{ env.HOME }}/.vault_pass
           ANSIBLE_HOST_KEY_CHECKING: "False"
         run: |
           ansible-playbook \

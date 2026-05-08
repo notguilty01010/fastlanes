@@ -31,9 +31,14 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
     return { fieldErrors };
   }
 
+  // Защита от open-redirect: принимаем только относительные пути типа "/...".
+  // Auth.js дополнительно нормализует, но не полагаемся.
+  const callbackUrlRaw = formData.get("callbackUrl");
   const callbackUrl =
-    typeof formData.get("callbackUrl") === "string"
-      ? (formData.get("callbackUrl") as string)
+    typeof callbackUrlRaw === "string" &&
+    callbackUrlRaw.startsWith("/") &&
+    !callbackUrlRaw.startsWith("//")
+      ? callbackUrlRaw
       : "/admin";
 
   try {

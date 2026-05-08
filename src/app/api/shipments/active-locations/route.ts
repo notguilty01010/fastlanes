@@ -2,23 +2,11 @@ import { NextResponse } from "next/server";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import type { ActiveLocation } from "@/lib/active-location";
+import { ACTIVE_SHIPMENT_STATUSES } from "@/lib/shipment-status";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
-
-export type ActiveLocation = {
-  shipmentId: string;
-  title: string;
-  status: string;
-  origin: string;
-  destination: string;
-  manager: { name: string; email: string } | null;
-  latitude: number;
-  longitude: number;
-  accuracy: number | null;
-  speed: number | null;
-  capturedAt: string;
-};
 
 export async function GET() {
   const session = await auth();
@@ -29,7 +17,7 @@ export async function GET() {
   // Активный груз = всё, кроме delivered/cancelled. Берём последнюю точку
   // среди всех его трекеров (любой active-tracker сгодится).
   const shipments = await prisma.shipment.findMany({
-    where: { status: { in: ["created", "waiting", "in_transit"] } },
+    where: { status: { in: [...ACTIVE_SHIPMENT_STATUSES] } },
     select: {
       id: true,
       title: true,

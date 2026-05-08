@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 
-import type { ActiveLocation } from "@/app/api/shipments/active-locations/route";
+import type { ActiveLocation } from "@/lib/active-location";
 
 const MapView = dynamic(() => import("./map-view").then((m) => m.MapView), {
   ssr: false,

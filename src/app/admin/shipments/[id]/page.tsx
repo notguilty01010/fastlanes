@@ -4,6 +4,7 @@ import QRCode from "qrcode";
 import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { getPublicUrl } from "@/lib/public-url";
+import { SHIPMENT_STATUSES, SHIPMENT_STATUS_LABEL } from "@/lib/shipment-status";
 import {
   deleteShipmentAction,
   setShipmentStatusAction,
@@ -16,16 +17,6 @@ import {
   disableTrackerAction,
   enableTrackerAction,
 } from "../trackers-actions";
-
-const STATUSES = ["created", "waiting", "in_transit", "delivered", "cancelled"] as const;
-
-const STATUS_LABEL: Record<(typeof STATUSES)[number], string> = {
-  created: "створено",
-  waiting: "очікує",
-  in_transit: "у дорозі",
-  delivered: "доставлено",
-  cancelled: "скасовано",
-};
 
 const TRACKER_STATUS_LABEL: Record<string, string> = {
   active: "активний",
@@ -89,7 +80,7 @@ export default async function ShipmentDetailPage({
       <section className="panel">
         <h2>Швидка зміна статусу</h2>
         <div className="row-actions row-wrap">
-          {STATUSES.map((s) => (
+          {SHIPMENT_STATUSES.map((s) => (
             <form key={s} action={setShipmentStatusAction}>
               <input type="hidden" name="id" value={shipment.id} />
               <input type="hidden" name="status" value={s} />
@@ -98,7 +89,7 @@ export default async function ShipmentDetailPage({
                 className={`btn ${shipment.status === s ? "" : "btn-secondary"}`}
                 disabled={shipment.status === s}
               >
-                {STATUS_LABEL[s]}
+                {SHIPMENT_STATUS_LABEL[s]}
               </button>
             </form>
           ))}

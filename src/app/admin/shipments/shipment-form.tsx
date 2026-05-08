@@ -5,19 +5,10 @@ import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import type { ShipmentStatus } from "@prisma/client";
 
+import { SHIPMENT_STATUSES, SHIPMENT_STATUS_LABEL } from "@/lib/shipment-status";
 import type { ShipmentFormState } from "./actions";
 
 const initial: ShipmentFormState = {};
-
-const STATUSES: ShipmentStatus[] = ["created", "waiting", "in_transit", "delivered", "cancelled"];
-
-const STATUS_LABEL: Record<ShipmentStatus, string> = {
-  created: "створено",
-  waiting: "очікує",
-  in_transit: "у дорозі",
-  delivered: "доставлено",
-  cancelled: "скасовано",
-};
 
 type Manager = { id: string; name: string; email: string };
 
@@ -111,9 +102,9 @@ export function ShipmentForm({ mode, action, managers, defaultValues }: Props) {
       <label>
         Статус
         <select name="status" defaultValue={defaultValues?.status ?? "created"}>
-          {STATUSES.map((s) => (
+          {SHIPMENT_STATUSES.map((s) => (
             <option key={s} value={s}>
-              {STATUS_LABEL[s]}
+              {SHIPMENT_STATUS_LABEL[s]}
             </option>
           ))}
         </select>
