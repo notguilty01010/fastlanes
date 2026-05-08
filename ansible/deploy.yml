@@ -88,6 +88,28 @@
       ansible.builtin.command: sudo /bin/systemctl restart {{ service_name }}
       changed_when: true
 
+    # ---------- TLS / Let's Encrypt ----------
+    # Если сертификата нет (например, провижн упал на certbot) — выпускаем.
+    # Иначе пробуем `certbot renew`: если до истечения < 30 дней, certbot
+    # сам обновит и перезагрузит nginx; в остальных случаях это no-op.
+    - name: Check Let's Encrypt cert exists
+      ansible.builtin.stat:
+        path: "/etc/letsencrypt/live/{{ domain }}/fullchain.pem"
+      register: le_cert
+
+    - name: Issue Let's Encrypt cert (first time)
+      ansible.builtin.command: >-
+        sudo /usr/bin/certbot --nginx -n --agree-tos
+        --email {{ letsencrypt_email }}
+        -d {{ domain }}
+      when: not le_cert.stat.exists
+      changed_when: true
+
+    - name: Renew Let's Encrypt certs
+      ansible.builtin.command: sudo /usr/bin/certbot renew --quiet --no-random-sleep-on-renew --deploy-hook "/bin/systemctl reload nginx"
+      when: le_cert.stat.exists
+      changed_when: false
+
     - name: Wait for /api/health
       ansible.builtin.uri:
         url: "https://{{ domain }}/api/health"
