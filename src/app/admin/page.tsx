@@ -3,20 +3,26 @@ import Link from "next/link";
 export default function AdminHome() {
   return (
     <>
-      <h1>Админка</h1>
-      <p className="muted">Управление грузами, трекерами и пользователями.</p>
+      <h1>Адмінка</h1>
+      <p className="muted">Керування вантажами, трекерами та користувачами.</p>
 
-      <ul>
-        <li>
-          <Link href="/admin/shipments">Грузы</Link> — создание, статусы, трекинг-ссылки
-        </li>
-        <li>
-          <Link href="/admin/map">Карта</Link> — текущее положение активных грузов
-        </li>
-        <li>
-          <Link href="/admin/users">Пользователи</Link> — менеджеры и админы
-        </li>
-      </ul>
+      <div className="admin-cards">
+        <Link href="/admin/shipments" className="admin-card">
+          <div className="admin-card-icon" aria-hidden>📦</div>
+          <h3>Вантажі</h3>
+          <p className="muted">Створення, статуси, трекінг-посилання</p>
+        </Link>
+        <Link href="/admin/map" className="admin-card">
+          <div className="admin-card-icon" aria-hidden>🗺️</div>
+          <h3>Карта</h3>
+          <p className="muted">Поточне розташування активних вантажів</p>
+        </Link>
+        <Link href="/admin/users" className="admin-card">
+          <div className="admin-card-icon" aria-hidden>👥</div>
+          <h3>Користувачі</h3>
+          <p className="muted">Менеджери та адміністратори</p>
+        </Link>
+      </div>
     </>
   );
 }

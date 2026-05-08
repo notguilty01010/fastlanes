@@ -10,8 +10,8 @@ const initial: LoginState = {};
 function SubmitButton() {
   const { pending } = useFormStatus();
   return (
-    <button type="submit" disabled={pending}>
-      {pending ? "Входим…" : "Войти"}
+    <button type="submit" disabled={pending} className="btn-block">
+      {pending ? "Входимо…" : "Увійти"}
     </button>
   );
 }
@@ -26,7 +26,7 @@ export function LoginForm({
   const [state, formAction] = useActionState(loginAction, initial);
 
   const error =
-    state.error ?? (initialError === "CredentialsSignin" ? "Неверный email или пароль" : undefined);
+    state.error ?? (initialError === "CredentialsSignin" ? "Невірний email або пароль" : undefined);
 
   return (
     <form action={formAction} className="login-form">

@@ -19,6 +19,19 @@ import {
 
 const STATUSES = ["created", "waiting", "in_transit", "delivered", "cancelled"] as const;
 
+const STATUS_LABEL: Record<(typeof STATUSES)[number], string> = {
+  created: "створено",
+  waiting: "очікує",
+  in_transit: "у дорозі",
+  delivered: "доставлено",
+  cancelled: "скасовано",
+};
+
+const TRACKER_STATUS_LABEL: Record<string, string> = {
+  active: "активний",
+  disabled: "вимкнений",
+};
+
 export default async function ShipmentDetailPage({
   params,
 }: {
@@ -73,9 +86,9 @@ export default async function ShipmentDetailPage({
         {shipment.origin} → {shipment.destination}
       </p>
 
-      <section style={{ marginBottom: "2rem" }}>
-        <h2>Быстрая смена статуса</h2>
-        <div className="row-actions" style={{ flexWrap: "wrap" }}>
+      <section className="panel">
+        <h2>Швидка зміна статусу</h2>
+        <div className="row-actions row-wrap">
           {STATUSES.map((s) => (
             <form key={s} action={setShipmentStatusAction}>
               <input type="hidden" name="id" value={shipment.id} />
@@ -85,27 +98,27 @@ export default async function ShipmentDetailPage({
                 className={`btn ${shipment.status === s ? "" : "btn-secondary"}`}
                 disabled={shipment.status === s}
               >
-                {s}
+                {STATUS_LABEL[s]}
               </button>
             </form>
           ))}
         </div>
       </section>
 
-      <section style={{ marginBottom: "2rem" }}>
-        <h2>Трекинг-ссылки</h2>
+      <section className="panel">
+        <h2>Трекінг-посилання</h2>
         <p className="muted">
-          Дай ссылку или QR-код водителю — с неё он передаёт геолокацию. Отключённая ссылка
-          перестанет принимать координаты.
+          Дайте посилання або QR-код водієві — з нього він передає геолокацію. Вимкнене
+          посилання припиняє приймати координати.
         </p>
 
-        <form action={createTrackerAction} style={{ marginBottom: "1rem" }}>
+        <form action={createTrackerAction} className="panel-action">
           <input type="hidden" name="shipmentId" value={shipment.id} />
-          <button type="submit">+ Сгенерировать ссылку</button>
+          <button type="submit">+ Згенерувати посилання</button>
         </form>
 
         {trackerCards.length === 0 ? (
-          <p className="muted">Ссылок пока нет.</p>
+          <p className="muted">Посилань поки немає.</p>
         ) : (
           <div className="tracker-grid">
             {trackerCards.map(({ tracker, url, qrDataUrl }) => {
@@ -116,14 +129,14 @@ export default async function ShipmentDetailPage({
                   <div className="tracker-card-head">
                     <span
                       className={`badge ${isActive ? "badge-admin" : "badge-inactive"}`}
-                      aria-label="status"
+                      aria-label="статус"
                     >
-                      {tracker.status}
+                      {TRACKER_STATUS_LABEL[tracker.status] ?? tracker.status}
                     </span>
                     <span className="muted">
-                      {tracker._count.points} точек
+                      {tracker._count.points} точок
                       {last
-                        ? ` • последняя ${last.createdAt.toISOString().slice(0, 16).replace("T", " ")}`
+                        ? ` • остання ${last.createdAt.toISOString().slice(0, 16).replace("T", " ")}`
                         : ""}
                     </span>
                   </div>
@@ -138,7 +151,7 @@ export default async function ShipmentDetailPage({
                         <input type="hidden" name="id" value={tracker.id} />
                         <input type="hidden" name="shipmentId" value={shipment.id} />
                         <button type="submit" className="btn btn-secondary">
-                          Отключить
+                          Вимкнути
                         </button>
                       </form>
                     ) : (
@@ -146,7 +159,7 @@ export default async function ShipmentDetailPage({
                         <input type="hidden" name="id" value={tracker.id} />
                         <input type="hidden" name="shipmentId" value={shipment.id} />
                         <button type="submit" className="btn btn-secondary">
-                          Включить
+                          Увімкнути
                         </button>
                       </form>
                     )}
@@ -158,8 +171,8 @@ export default async function ShipmentDetailPage({
         )}
       </section>
 
-      <section style={{ marginBottom: "2rem" }}>
-        <h2>Параметры груза</h2>
+      <section className="panel">
+        <h2>Параметри вантажу</h2>
         <ShipmentForm
           mode="edit"
           action={action}
@@ -175,17 +188,15 @@ export default async function ShipmentDetailPage({
         />
       </section>
 
-      <section>
-        <h2>Опасная зона</h2>
+      <section className="panel panel-danger">
+        <h2>Небезпечна зона</h2>
+        <p className="muted">Видалення каскадно прибирає всі трекери та точки.</p>
         <form action={deleteShipmentAction}>
           <input type="hidden" name="id" value={shipment.id} />
           <button type="submit" className="btn btn-danger">
-            Удалить груз
+            Видалити вантаж
           </button>
         </form>
-        <p className="muted" style={{ marginTop: "0.5rem" }}>
-          Удаление каскадно убирает все трекеры и точки.
-        </p>
       </section>
     </>
   );

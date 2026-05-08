@@ -7,7 +7,7 @@ export default async function NewUserPage() {
 
   return (
     <>
-      <h1>Новый пользователь</h1>
+      <h1>Новий користувач</h1>
       <UserForm mode="create" action={createUserAction} />
     </>
   );

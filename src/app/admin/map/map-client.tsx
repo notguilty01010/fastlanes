@@ -7,7 +7,7 @@ import type { ActiveLocation } from "@/app/api/shipments/active-locations/route"
 
 const MapView = dynamic(() => import("./map-view").then((m) => m.MapView), {
   ssr: false,
-  loading: () => <p className="muted">Загружаем карту…</p>,
+  loading: () => <p className="muted">Завантажуємо карту…</p>,
 });
 
 const POLL_INTERVAL_MS = 15_000;
@@ -54,12 +54,12 @@ export function MapClient() {
     <>
       <div className="map-toolbar">
         <span className="muted">
-          {state === "loading" && "Загружаем активные грузы…"}
+          {state === "loading" && "Завантажуємо активні вантажі…"}
           {state === "ok" &&
-            `${points.length} активных груз(а/ов) с координатами${
-              updatedAt ? ` · обновлено ${new Date(updatedAt).toLocaleTimeString()}` : ""
+            `${points.length} активних вантажів з координатами${
+              updatedAt ? ` · оновлено ${new Date(updatedAt).toLocaleTimeString()}` : ""
             }`}
-          {state === "error" && "Не удалось получить данные — повторим через 15 секунд"}
+          {state === "error" && "Не вдалося отримати дані — спробуємо знову через 15 секунд"}
         </span>
       </div>
       <MapView points={points} />

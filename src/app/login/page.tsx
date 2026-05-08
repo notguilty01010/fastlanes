@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { LoginForm } from "./login-form";
 
 export const metadata = {
-  title: "Вход — FastLanes",
+  title: "Вхід — FastLanes",
 };
 
 export default async function LoginPage({
@@ -20,9 +20,13 @@ export default async function LoginPage({
   }
 
   return (
-    <main>
-      <h1>Вход</h1>
-      <LoginForm callbackUrl={params.callbackUrl} initialError={params.error} />
+    <main className="login-page">
+      <div className="login-card">
+        <div className="login-brand">FastLanes</div>
+        <h1>Вхід</h1>
+        <p className="muted">Введіть email та пароль для доступу до адмінки.</p>
+        <LoginForm callbackUrl={params.callbackUrl} initialError={params.error} />
+      </div>
     </main>
   );
 }

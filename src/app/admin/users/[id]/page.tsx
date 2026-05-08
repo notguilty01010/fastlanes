@@ -14,7 +14,6 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
 
   const isSelf = session.user.id === user.id;
 
-  // Сужаем сигнатуру: useActionState ожидает (state, formData) => state.
   const action = updateUserAction.bind(null, user.id) as (
     state: UserFormState,
     formData: FormData,
@@ -22,7 +21,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
 
   return (
     <>
-      <h1>Пользователь: {user.name}</h1>
+      <h1>Користувач: {user.name}</h1>
       <UserForm
         mode="edit"
         action={action}

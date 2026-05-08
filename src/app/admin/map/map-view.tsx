@@ -35,7 +35,7 @@ function FitBounds({ points }: { points: ActiveLocation[] }) {
 
 export function MapView({ points }: { points: ActiveLocation[] }) {
   const center = useMemo<[number, number]>(() => {
-    if (points.length === 0) return [50.45, 30.52]; // Киев — fallback
+    if (points.length === 0) return [50.45, 30.52]; // Київ — fallback
     return [points[0].latitude, points[0].longitude];
   }, [points]);
 
@@ -63,7 +63,7 @@ export function MapView({ points }: { points: ActiveLocation[] }) {
             <span>статус: {p.status}</span>
             <br />
             <span>
-              координаты: {p.latitude.toFixed(5)}, {p.longitude.toFixed(5)}
+              координати: {p.latitude.toFixed(5)}, {p.longitude.toFixed(5)}
             </span>
             <br />
             <span>
@@ -76,7 +76,7 @@ export function MapView({ points }: { points: ActiveLocation[] }) {
               </>
             ) : null}
             <br />
-            <a href={`/admin/shipments/${p.shipmentId}`}>Открыть груз →</a>
+            <a href={`/admin/shipments/${p.shipmentId}`}>Відкрити вантаж →</a>
           </Popup>
         </Marker>
       ))}

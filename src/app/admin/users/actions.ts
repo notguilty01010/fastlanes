@@ -10,14 +10,14 @@ import { hashPassword } from "@/lib/password";
 import { prisma } from "@/lib/prisma";
 
 const baseSchema = z.object({
-  name: z.string().min(1, "Введите имя").max(120),
-  email: z.string().email("Некорректный email").max(254),
+  name: z.string().min(1, "Введіть ім'я").max(120),
+  email: z.string().email("Некоректний email").max(254),
   role: z.enum(["admin", "manager"]),
   isActive: z.boolean(),
 });
 
 const createSchema = baseSchema.extend({
-  password: z.string().min(8, "Минимум 8 символов").max(200),
+  password: z.string().min(8, "Мінімум 8 символів").max(200),
 });
 
 const updateSchema = baseSchema.extend({
@@ -26,7 +26,7 @@ const updateSchema = baseSchema.extend({
     .max(200)
     .optional()
     .transform((v) => (v && v.length > 0 ? v : undefined))
-    .refine((v) => v === undefined || v.length >= 8, "Минимум 8 символов"),
+    .refine((v) => v === undefined || v.length >= 8, "Мінімум 8 символів"),
 });
 
 export type UserFormState = {
@@ -88,7 +88,7 @@ export async function createUserAction(
     });
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
-      return { fieldErrors: { email: "Пользователь с таким email уже есть" } };
+      return { fieldErrors: { email: "Користувач із таким email вже існує" } };
     }
     throw err;
   }
@@ -110,13 +110,13 @@ export async function updateUserAction(
     return { fieldErrors: collectFieldErrors(parsed.error) };
   }
 
-  // Защита: админ не должен случайно лишить себя роли или деактивировать себя.
+  // Захист: адмін не повинен випадково забрати в себе роль або деактивувати себе.
   const isSelf = session.user.id === id;
   if (isSelf && parsed.data.role !== "admin") {
-    return { fieldErrors: { role: "Нельзя снять админа с себя" } };
+    return { fieldErrors: { role: "Не можна зняти адміна із себе" } };
   }
   if (isSelf && !parsed.data.isActive) {
-    return { fieldErrors: { isActive: "Нельзя деактивировать себя" } };
+    return { fieldErrors: { isActive: "Не можна деактивувати себе" } };
   }
 
   try {
@@ -132,7 +132,7 @@ export async function updateUserAction(
     });
   } catch (err) {
     if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
-      return { fieldErrors: { email: "Пользователь с таким email уже есть" } };
+      return { fieldErrors: { email: "Користувач із таким email вже існує" } };
     }
     throw err;
   }
@@ -148,7 +148,7 @@ export async function toggleUserActiveAction(formData: FormData) {
   if (!id) return;
 
   if (session.user.id === id) {
-    // safety net — реально отключённая в UI кнопка для self
+    // safety net — реально вимкнена в UI кнопка для self
     return;
   }
 

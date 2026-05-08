@@ -14,7 +14,7 @@ export default async function NewShipmentPage() {
 
   return (
     <>
-      <h1>Новый груз</h1>
+      <h1>Новий вантаж</h1>
       <ShipmentForm mode="create" action={createShipmentAction} managers={managers} />
     </>
   );

@@ -25,7 +25,7 @@ function SubmitButton({ mode }: { mode: Props["mode"] }) {
   const { pending } = useFormStatus();
   return (
     <button type="submit" disabled={pending}>
-      {pending ? "Сохраняем…" : mode === "create" ? "Создать" : "Сохранить"}
+      {pending ? "Зберігаємо…" : mode === "create" ? "Створити" : "Зберегти"}
     </button>
   );
 }
@@ -34,9 +34,9 @@ export function UserForm({ mode, action, defaultValues, disableSelfDanger }: Pro
   const [state, formAction] = useActionState(action, initial);
 
   return (
-    <form action={formAction}>
+    <form action={formAction} className="card-form">
       <label>
-        Имя
+        Ім&apos;я
         <input
           name="name"
           type="text"
@@ -68,18 +68,20 @@ export function UserForm({ mode, action, defaultValues, disableSelfDanger }: Pro
           defaultValue={defaultValues?.role ?? "manager"}
           disabled={disableSelfDanger}
         >
-          <option value="manager">manager</option>
-          <option value="admin">admin</option>
+          <option value="manager">менеджер</option>
+          <option value="admin">адмін</option>
         </select>
         {state.fieldErrors?.role ? <small className="error">{state.fieldErrors.role}</small> : null}
         {disableSelfDanger ? (
-          <small className="muted">Нельзя менять роль у самого себя</small>
+          <small className="muted">Не можна змінювати роль у самого себе</small>
         ) : null}
       </label>
 
       <label>
         Пароль{" "}
-        {mode === "edit" ? <span className="muted">(оставь пустым, если не меняешь)</span> : null}
+        {mode === "edit" ? (
+          <span className="muted">(залиште порожнім, якщо не змінюєте)</span>
+        ) : null}
         <input
           name="password"
           type="password"
@@ -93,15 +95,14 @@ export function UserForm({ mode, action, defaultValues, disableSelfDanger }: Pro
         ) : null}
       </label>
 
-      <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+      <label className="checkbox-label">
         <input
           name="isActive"
           type="checkbox"
           defaultChecked={defaultValues?.isActive ?? true}
           disabled={disableSelfDanger}
-          style={{ width: "auto" }}
         />
-        Активен
+        Активний
         {state.fieldErrors?.isActive ? (
           <small className="error">{state.fieldErrors.isActive}</small>
         ) : null}
@@ -112,7 +113,7 @@ export function UserForm({ mode, action, defaultValues, disableSelfDanger }: Pro
       <div className="row-actions">
         <SubmitButton mode={mode} />
         <Link href="/admin/users" className="btn btn-secondary">
-          Отмена
+          Скасувати
         </Link>
       </div>
     </form>

@@ -4,7 +4,7 @@ import { requireAdmin } from "@/lib/auth-helpers";
 import { logoutAction } from "./actions";
 
 export const metadata = {
-  title: "Админка — FastLanes",
+  title: "Адмінка — FastLanes",
 };
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -13,14 +13,16 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   return (
     <>
       <nav className="admin-nav">
-        <Link href="/admin">FastLanes admin</Link>
-        <Link href="/admin/shipments">Грузы</Link>
+        <Link href="/admin" className="admin-nav-brand">
+          FastLanes
+        </Link>
+        <Link href="/admin/shipments">Вантажі</Link>
         <Link href="/admin/map">Карта</Link>
-        <Link href="/admin/users">Пользователи</Link>
+        <Link href="/admin/users">Користувачі</Link>
         <span className="spacer">{session.user.email}</span>
         <form action={logoutAction}>
           <button type="submit" className="btn-secondary">
-            Выйти
+            Вийти
           </button>
         </form>
       </nav>

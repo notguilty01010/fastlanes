@@ -11,6 +11,14 @@ const initial: ShipmentFormState = {};
 
 const STATUSES: ShipmentStatus[] = ["created", "waiting", "in_transit", "delivered", "cancelled"];
 
+const STATUS_LABEL: Record<ShipmentStatus, string> = {
+  created: "створено",
+  waiting: "очікує",
+  in_transit: "у дорозі",
+  delivered: "доставлено",
+  cancelled: "скасовано",
+};
+
 type Manager = { id: string; name: string; email: string };
 
 type Props = {
@@ -31,7 +39,7 @@ function SubmitButton({ mode }: { mode: Props["mode"] }) {
   const { pending } = useFormStatus();
   return (
     <button type="submit" disabled={pending}>
-      {pending ? "Сохраняем…" : mode === "create" ? "Создать" : "Сохранить"}
+      {pending ? "Зберігаємо…" : mode === "create" ? "Створити" : "Зберегти"}
     </button>
   );
 }
@@ -40,9 +48,9 @@ export function ShipmentForm({ mode, action, managers, defaultValues }: Props) {
   const [state, formAction] = useActionState(action, initial);
 
   return (
-    <form action={formAction}>
+    <form action={formAction} className="card-form">
       <label>
-        Название
+        Назва
         <input
           name="title"
           type="text"
@@ -57,7 +65,7 @@ export function ShipmentForm({ mode, action, managers, defaultValues }: Props) {
       </label>
 
       <label>
-        Описание
+        Опис
         <textarea
           name="description"
           rows={3}
@@ -71,7 +79,7 @@ export function ShipmentForm({ mode, action, managers, defaultValues }: Props) {
       </label>
 
       <label>
-        Откуда
+        Звідки
         <input
           name="origin"
           type="text"
@@ -86,7 +94,7 @@ export function ShipmentForm({ mode, action, managers, defaultValues }: Props) {
       </label>
 
       <label>
-        Куда
+        Куди
         <input
           name="destination"
           type="text"
@@ -105,7 +113,7 @@ export function ShipmentForm({ mode, action, managers, defaultValues }: Props) {
         <select name="status" defaultValue={defaultValues?.status ?? "created"}>
           {STATUSES.map((s) => (
             <option key={s} value={s}>
-              {s}
+              {STATUS_LABEL[s]}
             </option>
           ))}
         </select>
@@ -117,7 +125,7 @@ export function ShipmentForm({ mode, action, managers, defaultValues }: Props) {
       <label>
         Менеджер
         <select name="managerId" defaultValue={defaultValues?.managerId ?? ""}>
-          <option value="">— не назначен —</option>
+          <option value="">— не призначений —</option>
           {managers.map((m) => (
             <option key={m.id} value={m.id}>
               {m.name} ({m.email})
@@ -134,7 +142,7 @@ export function ShipmentForm({ mode, action, managers, defaultValues }: Props) {
       <div className="row-actions">
         <SubmitButton mode={mode} />
         <Link href="/admin/shipments" className="btn btn-secondary">
-          Отмена
+          Скасувати
         </Link>
       </div>
     </form>

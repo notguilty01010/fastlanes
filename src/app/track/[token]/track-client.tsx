@@ -117,13 +117,13 @@ export function TrackClient({ token }: { token: string }) {
   const handleError = useCallback((err: GeolocationPositionError) => {
     setStatus("error");
     if (err.code === err.PERMISSION_DENIED) {
-      setError("Доступ к геолокации запрещён. Разреши его в настройках браузера и перезайди на страницу.");
+      setError("Доступ до геолокації заборонено. Дозвольте його в налаштуваннях браузера та перезайдіть на сторінку.");
     } else if (err.code === err.POSITION_UNAVAILABLE) {
-      setError("Геолокация недоступна (нет GPS / сигнала).");
+      setError("Геолокація недоступна (немає GPS / сигналу).");
     } else if (err.code === err.TIMEOUT) {
-      setError("Геолокация не отвечает (timeout).");
+      setError("Геолокація не відповідає (timeout).");
     } else {
-      setError("Не удалось получить координаты.");
+      setError("Не вдалося отримати координати.");
     }
   }, []);
 
@@ -131,7 +131,7 @@ export function TrackClient({ token }: { token: string }) {
     setError(null);
     if (typeof navigator === "undefined" || !navigator.geolocation) {
       setStatus("error");
-      setError("Геолокация не поддерживается браузером.");
+      setError("Геолокація не підтримується браузером.");
       return;
     }
 
@@ -189,22 +189,22 @@ export function TrackClient({ token }: { token: string }) {
   }, []);
 
   const statusLabel: Record<SendStatus, string> = {
-    idle: "не активен",
-    sending: "отправка…",
-    ok: "координаты уходят",
-    error: "ошибка отправки",
-    offline: "нет сети — координаты в буфере",
+    idle: "не активний",
+    sending: "відправка…",
+    ok: "координати надходять",
+    error: "помилка відправки",
+    offline: "немає мережі — координати в буфері",
   };
 
   return (
     <div className="track-controls">
       {!running ? (
         <button type="button" className="btn track-btn-primary" onClick={start}>
-          Начать передачу геолокации
+          Почати передачу геолокації
         </button>
       ) : (
         <button type="button" className="btn btn-secondary track-btn-primary" onClick={stop}>
-          Остановить
+          Зупинити
         </button>
       )}
 
@@ -217,14 +217,14 @@ export function TrackClient({ token }: { token: string }) {
 
       {last ? (
         <p className="muted track-last">
-          Последняя точка: {last.lat.toFixed(5)}, {last.lon.toFixed(5)} ·{" "}
+          Остання точка: {last.lat.toFixed(5)}, {last.lon.toFixed(5)} ·{" "}
           {new Date(last.at).toLocaleTimeString()}
         </p>
       ) : null}
 
-      <p className="muted" style={{ fontSize: "0.85rem" }}>
-        Не закрывай вкладку, пока ведёшь груз. На некоторых устройствах геолокация в фоне
-        приостанавливается операционкой — поэтому экран мы пытаемся держать активным.
+      <p className="muted track-hint">
+        Не закривайте вкладку, поки ведете вантаж. На деяких пристроях геолокація у фоні
+        призупиняється операційною системою — тому ми намагаємось тримати екран активним.
       </p>
     </div>
   );

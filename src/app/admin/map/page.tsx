@@ -12,11 +12,11 @@ export default async function MapPage() {
 
   return (
     <>
-      <h1>Карта активных грузов</h1>
+      <h1>Карта активних вантажів</h1>
       <p className="muted">
-        Только грузы в статусе <code>created</code>, <code>waiting</code> или{" "}
-        <code>in_transit</code> и только последняя точка от любого активного трекера. Опрос каждые
-        15 секунд.
+        Тільки вантажі у статусі <code>created</code>, <code>waiting</code> або{" "}
+        <code>in_transit</code> та лише остання точка від будь-якого активного трекера. Опитування
+        кожні 15 секунд.
       </p>
       <MapClient />
     </>

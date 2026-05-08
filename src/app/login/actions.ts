@@ -6,8 +6,8 @@ import { z } from "zod";
 import { signIn } from "@/auth";
 
 const loginSchema = z.object({
-  email: z.string().email("Некорректный email"),
-  password: z.string().min(1, "Введите пароль"),
+  email: z.string().email("Некоректний email"),
+  password: z.string().min(1, "Введіть пароль"),
 });
 
 export type LoginState = {
@@ -45,9 +45,9 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   } catch (err) {
     if (err instanceof AuthError) {
       if (err.type === "CredentialsSignin") {
-        return { error: "Неверный email или пароль" };
+        return { error: "Невірний email або пароль" };
       }
-      return { error: "Не удалось войти" };
+      return { error: "Не вдалося увійти" };
     }
     throw err;
   }

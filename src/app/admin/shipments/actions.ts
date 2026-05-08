@@ -11,14 +11,14 @@ import { prisma } from "@/lib/prisma";
 const SHIPMENT_STATUSES = ["created", "waiting", "in_transit", "delivered", "cancelled"] as const;
 
 const baseSchema = z.object({
-  title: z.string().min(1, "Введите название").max(200),
+  title: z.string().min(1, "Введіть назву").max(200),
   description: z
     .string()
     .max(2000)
     .optional()
     .transform((v) => (v && v.length > 0 ? v : null)),
-  origin: z.string().min(1, "Откуда").max(200),
-  destination: z.string().min(1, "Куда").max(200),
+  origin: z.string().min(1, "Звідки").max(200),
+  destination: z.string().min(1, "Куди").max(200),
   status: z.enum(SHIPMENT_STATUSES),
   managerId: z
     .string()

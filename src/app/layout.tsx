@@ -4,7 +4,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "FastLanes",
-  description: "Logistics tracker",
+  description: "Логістичний трекер",
 };
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ru">
+    <html lang="uk">
       <body>
         <Providers>{children}</Providers>
       </body>
