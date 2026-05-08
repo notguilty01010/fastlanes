@@ -38,7 +38,9 @@ jobs:
         run: |
           set -euo pipefail
           # Next standalone сам не копирует public/ и .next/static/.
-          cp -R public        .next/standalone/public
+          if [ -d public ]; then
+            cp -R public .next/standalone/public
+          fi
           cp -R .next/static  .next/standalone/.next/static
           # Схема + миграции — нужны для `prisma migrate deploy` на сервере.
           mkdir -p             .next/standalone/prisma
