@@ -5,7 +5,7 @@ import Link from "next/link";
 
 import { logoutAction } from "./actions";
 
-export function AdminNav({ email }: { email: string }) {
+export function AdminNav({ email }: { email?: string | null }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
