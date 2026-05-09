@@ -20,7 +20,7 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
   ) => Promise<UserFormState>;
 
   return (
-    <>
+    <div className="page-narrow">
       <h1>Користувач: {user.name}</h1>
       <UserForm
         mode="edit"
@@ -33,6 +33,6 @@ export default async function EditUserPage({ params }: { params: Promise<{ id: s
         }}
         disableSelfDanger={isSelf}
       />
-    </>
+    </div>
   );
 }

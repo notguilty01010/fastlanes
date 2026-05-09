@@ -13,9 +13,9 @@ export default async function NewShipmentPage() {
   });
 
   return (
-    <>
+    <div className="page-narrow">
       <h1>Новий вантаж</h1>
       <ShipmentForm mode="create" action={createShipmentAction} managers={managers} />
-    </>
+    </div>
   );
 }

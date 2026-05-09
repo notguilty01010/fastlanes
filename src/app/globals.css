@@ -157,6 +157,11 @@ label.checkbox-label input[type="checkbox"] {
   max-width: 640px;
 }
 
+.page-narrow {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
 button,
 .btn {
   display: inline-flex;
@@ -341,6 +346,13 @@ th {
   margin-right: 0.5rem;
 }
 
+.admin-nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex: 1;
+}
+
 .admin-nav .spacer {
   margin-left: auto;
   color: var(--muted);
@@ -350,6 +362,92 @@ th {
 .admin-nav button {
   padding: 0.4rem 0.9rem;
   font-size: 0.85rem;
+}
+
+.admin-nav-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 36px;
+  padding: 0;
+  margin-left: auto;
+  background: transparent;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+  cursor: pointer;
+}
+
+.admin-nav-toggle:hover:not(:disabled) {
+  background: var(--bg-elev-2);
+  filter: none;
+  box-shadow: none;
+}
+
+.admin-nav-toggle span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  margin: 0 auto;
+  background: var(--fg);
+  border-radius: 2px;
+  transition: transform 150ms ease, opacity 150ms ease;
+}
+
+.admin-nav.is-open .admin-nav-toggle span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.admin-nav.is-open .admin-nav-toggle span:nth-child(2) {
+  opacity: 0;
+}
+
+.admin-nav.is-open .admin-nav-toggle span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+@media (max-width: 720px) {
+  .admin-nav {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .admin-nav-toggle {
+    display: flex;
+  }
+
+  .admin-nav-links {
+    display: none;
+    flex-basis: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.85rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .admin-nav.is-open .admin-nav-links {
+    display: flex;
+  }
+
+  .admin-nav-links a {
+    padding: 0.5rem 0.25rem;
+  }
+
+  .admin-nav .spacer {
+    margin-left: 0;
+  }
+
+  .admin-nav-links form {
+    display: flex;
+  }
+
+  .admin-nav-links form button {
+    width: 100%;
+  }
 }
 
 /* Row actions */
@@ -789,7 +887,7 @@ th {
 /* Map page layout */
 .map-layout {
   display: grid;
-  grid-template-columns: 1fr 360px;
+  grid-template-columns: 1fr 440px;
   gap: 1rem;
   align-items: start;
 }
