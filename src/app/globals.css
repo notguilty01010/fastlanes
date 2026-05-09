@@ -420,7 +420,7 @@ th {
 .admin-nav .admin-nav-brand img {
   width: 48px;
   height: auto;
-  filter: saturate(1.6) brightness(1.4) drop-shadow(0 0 12px rgba(115, 18, 208, 0.65));
+  filter: saturate(1.3) brightness(1.3) drop-shadow(0 0 12px rgba(154, 46, 255, 0.65));
 }
 
 .admin-nav-links {
