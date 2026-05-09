@@ -38,20 +38,24 @@ export default async function ShipmentsPage() {
           <tbody>
             {shipments.map((s) => (
               <tr key={s.id}>
-                <td>
+                <td data-label="Назва">
                   <Link href={`/admin/shipments/${s.id}`}>{s.title}</Link>
                 </td>
-                <td className="muted">
+                <td data-label="Маршрут" className="muted">
                   {s.origin} → {s.destination}
                 </td>
-                <td>
+                <td data-label="Статус">
                   <span className={`badge badge-status-${s.status}`}>
                     {SHIPMENT_STATUS_LABEL[s.status]}
                   </span>
                 </td>
-                <td className="muted">{s.manager ? s.manager.name : "—"}</td>
-                <td className="muted">{s.createdAt.toISOString().slice(0, 10)}</td>
-                <td>
+                <td data-label="Менеджер" className="muted">
+                  {s.manager ? s.manager.name : "—"}
+                </td>
+                <td data-label="Створено" className="muted">
+                  {s.createdAt.toISOString().slice(0, 10)}
+                </td>
+                <td className="td-actions">
                   <Link href={`/admin/shipments/${s.id}`} className="btn btn-secondary">
                     Відкрити
                   </Link>

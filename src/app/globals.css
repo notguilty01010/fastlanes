@@ -295,6 +295,71 @@ th {
   background: var(--bg-elev-2);
 }
 
+@media (max-width: 720px) {
+  .table-wrap {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    overflow: visible;
+  }
+
+  .table-wrap table,
+  .table-wrap tbody,
+  .table-wrap tr,
+  .table-wrap td {
+    display: block;
+    width: 100%;
+  }
+
+  .table-wrap thead {
+    display: none;
+  }
+
+  .table-wrap tbody tr {
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.85rem 1rem;
+    margin-bottom: 0.75rem;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .table-wrap tbody tr:hover {
+    background: var(--bg-elev);
+  }
+
+  .table-wrap tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .table-wrap td {
+    border-bottom: 0;
+    padding: 0.3rem 0;
+  }
+
+  .table-wrap td[data-label]::before {
+    content: attr(data-label) ":";
+    display: inline-block;
+    margin-right: 0.5rem;
+    color: var(--muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    min-width: 96px;
+  }
+
+  .table-wrap td.td-actions {
+    margin-top: 0.65rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .table-wrap td.td-actions .row-actions {
+    flex-wrap: wrap;
+  }
+}
+
 /* Page header */
 .page-header {
   display: flex;
@@ -320,7 +385,7 @@ th {
   border-bottom: 1px solid var(--border);
   position: sticky;
   top: 0;
-  z-index: 50;
+  z-index: 1100;
 }
 
 .admin-nav a {

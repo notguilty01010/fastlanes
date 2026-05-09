@@ -44,22 +44,24 @@ export default async function UsersPage() {
               const isSelf = u.id === session.user.id;
               return (
                 <tr key={u.id}>
-                  <td>{u.name}</td>
-                  <td>{u.email}</td>
-                  <td>
+                  <td data-label="Ім'я">{u.name}</td>
+                  <td data-label="Email">{u.email}</td>
+                  <td data-label="Роль">
                     <span className={`badge ${u.role === "admin" ? "badge-admin" : ""}`}>
                       {ROLE_LABEL[u.role] ?? u.role}
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Статус">
                     {u.isActive ? (
                       <span className="badge">активний</span>
                     ) : (
                       <span className="badge badge-inactive">вимкнений</span>
                     )}
                   </td>
-                  <td className="muted">{u.createdAt.toISOString().slice(0, 10)}</td>
-                  <td>
+                  <td data-label="Створено" className="muted">
+                    {u.createdAt.toISOString().slice(0, 10)}
+                  </td>
+                  <td className="td-actions">
                     <div className="row-actions">
                       <Link href={`/admin/users/${u.id}`} className="btn btn-secondary">
                         Редагувати
