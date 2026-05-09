@@ -19,9 +19,9 @@ jobs:
       prisma_version: ${{ steps.meta.outputs.prisma_version }}
 
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v5
         with:
           node-version: "20"
           cache: "npm"
@@ -60,7 +60,7 @@ jobs:
           echo "release_tag=$tag"               >> "$GITHUB_OUTPUT"
           echo "prisma_version=$prisma_version" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: fastlanes-build
           path: fastlanes-build.tar.gz
@@ -77,9 +77,9 @@ jobs:
       url: https://fastlanes.pp.ua
 
     steps:
-      - uses: actions/checkout@v4.2.2
+      - uses: actions/checkout@v5
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           name: fastlanes-build
           path: ${{ runner.temp }}
