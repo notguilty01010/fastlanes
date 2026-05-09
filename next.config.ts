@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
   // Self-contained сборка для прод-деплоя: .next/standalone/server.js
   // плюс минимальный node_modules (только то, что реально используется).
   output: "standalone",
-  // Prisma грузит query-engine динамически, и трейсер Next его пропускает —
+  // Prisma грузит query-engine динамически, и трейсер Next его пропускает -
   // явно подсасываем .prisma/client в standalone-бандл.
   outputFileTracingIncludes: {
     "/**/*": ["./node_modules/.prisma/client/**/*"],

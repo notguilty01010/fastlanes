@@ -16,7 +16,7 @@ async function main() {
 
   if (!email || !password) {
     console.warn(
-      "[seed] No admin in DB and ADMIN_INITIAL_EMAIL/ADMIN_INITIAL_PASSWORD are not set — skipping.",
+      "[seed] No admin in DB and ADMIN_INITIAL_EMAIL/ADMIN_INITIAL_PASSWORD are not set - skipping.",
     );
     return;
   }

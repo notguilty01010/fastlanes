@@ -58,7 +58,6 @@ export function MapClient() {
     [statusFilter],
   );
 
-  // Avoid re-creating the array passed to the loader unless the filter actually changed.
   const activeStatuses = useMemo<ShipmentStatus[]>(
     () => SHIPMENT_STATUSES.filter((s) => statusFilter.has(s)),
     [statusFilter],
@@ -138,7 +137,7 @@ export function MapClient() {
             `${shipments.length} вантажів (${withPoint} з координатами)${
               updatedAt ? ` · оновлено ${new Date(updatedAt).toLocaleTimeString()}` : ""
             }`}
-          {state === "error" && "Не вдалося отримати дані — спробуємо знову через 15 секунд"}
+          {state === "error" && "Не вдалося отримати дані - спробуємо знову через 15 секунд"}
         </span>
       </div>
       <div className="map-layout">

@@ -12,7 +12,7 @@ export async function createTrackerAction(formData: FormData) {
   const shipmentId = String(formData.get("shipmentId") ?? "");
   if (!shipmentId) return;
 
-  // 24 символа из URL-safe алфавита nanoid — достаточно случайности и без `=` в URL.
+  // 24 символа nanoid - URL-safe и без `=`.
   const token = nanoid(24);
 
   await prisma.tracker.create({

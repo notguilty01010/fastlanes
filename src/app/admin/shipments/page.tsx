@@ -50,7 +50,7 @@ export default async function ShipmentsPage() {
                   </span>
                 </td>
                 <td data-label="Менеджер" className="muted">
-                  {s.manager ? s.manager.name : "—"}
+                  {s.manager ? s.manager.name : "-"}
                 </td>
                 <td data-label="Створено" className="muted">
                   {s.createdAt.toISOString().slice(0, 10)}

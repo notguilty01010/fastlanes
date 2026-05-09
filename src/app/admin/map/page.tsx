@@ -4,7 +4,7 @@ import { MapClient } from "./map-client";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Карта — FastLanes",
+  title: "Карта - FastLanes",
 };
 
 export default async function MapPage() {

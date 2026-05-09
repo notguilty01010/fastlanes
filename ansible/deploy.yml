@@ -1,6 +1,6 @@
 ---
 # Деплой готового артефакта (собран в CI). На сервере НЕ собираем и НЕ держим
-# devDependencies — едет только standalone-бандл Next.js + node_modules только
+# devDependencies - едет только standalone-бандл Next.js + node_modules только
 # с runtime-зависимостями.
 #
 # Схема Capistrano-style:
@@ -15,9 +15,9 @@
 #         .env                # отрендерен из vault
 #
 # Параметры (передаются через -e):
-#   artifact_path   — путь к tar.gz на runner'е CI
-#   release_tag     — уникальный идентификатор релиза (e.g. 20260508-abc1234)
-#   prisma_version  — версия prisma CLI для `npx prisma@x migrate deploy`
+#   artifact_path   - путь к tar.gz на runner'е CI
+#   release_tag     - уникальный идентификатор релиза (e.g. 20260508-abc1234)
+#   prisma_version  - версия prisma CLI для `npx prisma@x migrate deploy`
 
 - name: Deploy FastLanes
   hosts: fastlanes
@@ -89,7 +89,7 @@
       changed_when: true
 
     # TLS не трогаем здесь: первичный выпуск делает provision.yml,
-    # автоматическое продление — системный certbot.timer (ставится apt-пакетом).
+    # автоматическое продление - системный certbot.timer (ставится apt-пакетом).
 
     - name: Wait for /api/health
       ansible.builtin.uri:

@@ -1,9 +1,5 @@
-/**
- * In-memory rate limiter с LRU-выселением.
- *
- * Подходит для одного процесса (`next start` под systemd) — нашему MVP хватает.
- * Под кластер / несколько инстансов нужно будет переделать на Redis.
- */
+// In-memory rate limiter с LRU-выселением. Один процесс - для MVP достаточно;
+// под кластер нужен Redis.
 type Bucket = { count: number; resetAt: number };
 
 const MAX_KEYS = 5_000;
@@ -16,7 +12,6 @@ export class RateLimiter {
     private readonly windowMs: number,
   ) {}
 
-  /** true — запрос пропущен, false — превышен лимит. */
   check(key: string, now = Date.now()): { ok: boolean; retryAfterMs: number } {
     const bucket = this.store.get(key);
 
@@ -31,7 +26,7 @@ export class RateLimiter {
     }
 
     bucket.count += 1;
-    // Map в JS сохраняет порядок вставки — touch для LRU.
+    // Map в JS сохраняет порядок вставки - touch для LRU.
     this.store.delete(key);
     this.store.set(key, bucket);
     return { ok: true, retryAfterMs: 0 };
@@ -49,8 +44,7 @@ export class RateLimiter {
   }
 }
 
-// Один лимитер на токен: 1 запрос в 5 секунд.
-// Хранится на globalThis, чтобы пережить HMR в dev'е.
+// 1 запрос в 5 секунд на токен. На globalThis - чтобы пережить HMR.
 const globalForRl = globalThis as unknown as {
   __fastlanes_track_rl?: RateLimiter;
 };

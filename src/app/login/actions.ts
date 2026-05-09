@@ -31,8 +31,7 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
     return { fieldErrors };
   }
 
-  // Защита от open-redirect: принимаем только относительные пути типа "/...".
-  // Auth.js дополнительно нормализует, но не полагаемся.
+  // Open-redirect защита: только относительные пути.
   const callbackUrlRaw = formData.get("callbackUrl");
   const callbackUrl =
     typeof callbackUrlRaw === "string" &&

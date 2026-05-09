@@ -1,12 +1,12 @@
 ---
 # Одноразовый бутстрап первого админа.
-# Идемпотентен: если в БД уже есть admin — no-op.
+# Идемпотентен: если в БД уже есть admin - no-op.
 #
 # Запускается:
 #   - через workflow_dispatch у GitHub Actions (`.github/workflows/bootstrap-admin.yml`),
 #   - либо локально: `ansible-playbook -i inventory.ini bootstrap-admin.yml --vault-password-file ...`
 #
-# Использует уже выложенный релиз (current/) — там есть seed.mjs и node_modules
+# Использует уже выложенный релиз (current/) - там есть seed.mjs и node_modules
 # с @prisma/client и bcryptjs.
 
 - name: Bootstrap initial admin

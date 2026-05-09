@@ -42,7 +42,7 @@ jobs:
             cp -R public .next/standalone/public
           fi
           cp -R .next/static  .next/standalone/.next/static
-          # Схема + миграции — нужны для `prisma migrate deploy` на сервере.
+          # Схема + миграции - нужны для `prisma migrate deploy` на сервере.
           mkdir -p             .next/standalone/prisma
           cp -R prisma/schema.prisma prisma/migrations .next/standalone/prisma/
           # Сид (plain ESM, без tsx). Запускается отдельным плейбуком.

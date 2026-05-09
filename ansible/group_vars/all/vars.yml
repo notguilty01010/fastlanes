@@ -1,5 +1,5 @@
 ---
-# Несекретные параметры. Секреты — в vault.yml (зашифрованы ansible-vault).
+# Несекретные параметры. Секреты - в vault.yml (зашифрованы ansible-vault).
 
 domain: fastlanes.pp.ua
 letsencrypt_email: admin@fastlanes.pp.ua
@@ -18,7 +18,7 @@ service_name: fastlanes
 #   vault_admin_initial_name      (опционально)
 #
 # Бутстрап админа (`ansible/bootstrap-admin.yml`) идемпотентен: если в БД
-# уже есть admin — переменные игнорируются.
+# уже есть admin - переменные игнорируются.
 
 auth_secret: "{{ vault_auth_secret }}"
 admin_initial_email: "{{ vault_admin_initial_email | default('') }}"

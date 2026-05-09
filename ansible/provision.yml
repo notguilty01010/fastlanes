@@ -1,7 +1,7 @@
 ---
 # Идемпотентная настройка свежего Ubuntu 22.04/24.04 VPS.
 # Запускается из CI workflow `provision.yml` руками (workflow_dispatch).
-# Не трогает код приложения — только система. Деплой — отдельный плейбук.
+# Не трогает код приложения - только система. Деплой - отдельный плейбук.
 
 - name: Provision FastLanes VPS
   hosts: fastlanes
@@ -83,7 +83,7 @@
 
     # Тот же SSH-ключ, которым CI ходил под root, используем и для deploy-юзера.
     # Берём из ~root/.ssh/authorized_keys (его пользователь добавляет один раз руками
-    # на свежем сервере — см. README).
+    # на свежем сервере - см. README).
     - name: Read root authorized_keys
       ansible.builtin.slurp:
         src: /root/.ssh/authorized_keys
@@ -137,7 +137,7 @@
 
     # ---------- Nginx + Let's Encrypt ----------
     # Паттерн: dummy-cert bootstrap (как в mars-arena-devops/ansible/infra-deploy.yml).
-    # nginx-шаблон всегда содержит полный SSL-блок — никаких jinja-условий и
+    # nginx-шаблон всегда содержит полный SSL-блок - никаких jinja-условий и
     # двух режимов рендеринга. Чтобы nginx прошёл валидацию до выпуска реального
     # сертификата, кладём self-signed заглушку по тем же путям. Потом
     # `certbot certonly --webroot` перезаписывает её настоящим LE-сертификатом
@@ -214,7 +214,7 @@
 
     # certbot создаёт в /etc/letsencrypt/live/<domain>/ симлинки на
     # /etc/letsencrypt/archive/<domain>/. Если там лежат обычные файлы (наш
-    # dummy), он создаст новую lineage с суффиксом '-0001' — сломает пути
+    # dummy), он создаст новую lineage с суффиксом '-0001' - сломает пути
     # из nginx-конфига. Поэтому перед issue зачищаем dummy.
     - name: Remove dummy cert dir before first issuance
       ansible.builtin.file:
@@ -232,7 +232,7 @@
       notify: Reload nginx
 
     # Renewal hook: certbot.timer (ставится apt-пакетом, включён by default)
-    # сам гоняет renew дважды в сутки, но не знает про nginx — без хука
+    # сам гоняет renew дважды в сутки, но не знает про nginx - без хука
     # обновлённый сертификат не подхватится до рестарта.
     - name: Install certbot deploy-hook to reload nginx
       ansible.builtin.copy:

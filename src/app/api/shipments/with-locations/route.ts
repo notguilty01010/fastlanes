@@ -30,8 +30,7 @@ export async function GET(request: Request) {
   const url = new URL(request.url);
   const statuses = parseStatuses(url.searchParams.get("statuses"));
 
-  // statuses === null  → no filter (all statuses)
-  // statuses === []    → all requested values were invalid → return empty list
+  // null → без фильтра; [] → все запрошенные значения невалидны → пустой список.
   if (statuses !== null && statuses.length === 0) {
     return NextResponse.json({ data: [] satisfies ShipmentListItem[] }, { status: 200 });
   }

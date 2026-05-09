@@ -14,7 +14,7 @@ export default async function Home() {
         <h1>Логістичний трекер</h1>
         <p className="landing-lead">
           Створюйте вантажі, видавайте водіям трекінг-посилання та спостерігайте за переміщенням
-          у реальному часі — без зайвих застосунків.
+          у реальному часі - без зайвих застосунків.
         </p>
 
         <div className="landing-actions">
@@ -44,12 +44,12 @@ export default async function Home() {
         <div className="feature-card">
           <div className="feature-icon" aria-hidden>📦</div>
           <h3>Вантажі</h3>
-          <p className="muted">Заводьте маршрути, статуси й менеджерів — усе в одному місці.</p>
+          <p className="muted">Заводьте маршрути, статуси й менеджерів - усе в одному місці.</p>
         </div>
         <div className="feature-card">
           <div className="feature-icon" aria-hidden>🔗</div>
           <h3>Трекінг-посилання</h3>
-          <p className="muted">Згенеруйте посилання або QR-код — водій передає геолокацію зі смартфона.</p>
+          <p className="muted">Згенеруйте посилання або QR-код - водій передає геолокацію зі смартфона.</p>
         </div>
         <div className="feature-card">
           <div className="feature-icon" aria-hidden>🗺️</div>

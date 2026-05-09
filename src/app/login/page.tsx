@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { LoginForm } from "./login-form";
 
 export const metadata = {
-  title: "Вхід — FastLanes",
+  title: "Вхід - FastLanes",
 };
 
 export default async function LoginPage({

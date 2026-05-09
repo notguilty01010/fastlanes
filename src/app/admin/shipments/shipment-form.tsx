@@ -28,8 +28,7 @@ type Props = {
   };
 };
 
-// `<input type="datetime-local">` приймає лише `YYYY-MM-DDTHH:mm` без таймзони.
-// ISO-стрічка з мс/секундами/Z ламає підстановку defaultValue. Збираємо у локальному часі браузера.
+// `<input type="datetime-local">` хоче `YYYY-MM-DDTHH:mm` у локальному часі - ISO ламає defaultValue.
 function toDateTimeLocalValue(date: Date | null | undefined): string {
   if (!date) return "";
   const pad = (n: number) => n.toString().padStart(2, "0");
@@ -152,7 +151,7 @@ export function ShipmentForm({ mode, action, managers, defaultValues }: Props) {
       <label>
         Менеджер
         <select name="managerId" defaultValue={defaultValues?.managerId ?? ""}>
-          <option value="">— не призначений —</option>
+          <option value="">- не призначений -</option>
           {managers.map((m) => (
             <option key={m.id} value={m.id}>
               {m.name} ({m.email})

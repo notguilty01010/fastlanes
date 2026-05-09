@@ -12,8 +12,7 @@ const locationSchema = z.object({
   longitude: z.number().min(-180).max(180),
   accuracy: z.number().nonnegative().max(100_000).nullable().optional(),
   speed: z.number().min(-1).max(1_000).nullable().optional(),
-  // capturedAt пока не сохраняем — у нас createdAt серверный.
-  // Принимаем для совместимости, но игнорируем.
+  // Принимаем, но игнорируем - у нас createdAt серверный.
   capturedAt: z.string().datetime().optional(),
 });
 
@@ -23,7 +22,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ tok
     return NextResponse.json({ error: "invalid_token" }, { status: 404 });
   }
 
-  // Rate limit ДО запроса в БД — иначе токен в публичной ссылке = DoS-вектор.
+  // Rate limit до запроса в БД: токен публичный, иначе это DoS-вектор.
   const rl = trackTokenLimiter.check(token);
   if (!rl.ok) {
     return NextResponse.json(

@@ -20,9 +20,9 @@ type Props = {
 };
 
 function formatDate(iso: string | null): string {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return "—";
+  if (Number.isNaN(d.getTime())) return "-";
   return d.toLocaleDateString();
 }
 
@@ -187,8 +187,8 @@ function HistoryBlock({
                   <td>
                     {p.latitude.toFixed(5)}, {p.longitude.toFixed(5)}
                   </td>
-                  <td>{p.accuracy !== null ? `${p.accuracy.toFixed(0)} м` : "—"}</td>
-                  <td>{p.speed !== null ? `${p.speed.toFixed(1)} м/с` : "—"}</td>
+                  <td>{p.accuracy !== null ? `${p.accuracy.toFixed(0)} м` : "-"}</td>
+                  <td>{p.speed !== null ? `${p.speed.toFixed(1)} м/с` : "-"}</td>
                 </tr>
               ))}
             </tbody>

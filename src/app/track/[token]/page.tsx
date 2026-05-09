@@ -7,7 +7,7 @@ import { TrackClient } from "./track-client";
 export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Передача геолокації — FastLanes",
+  title: "Передача геолокації - FastLanes",
 };
 
 export default async function TrackPage({ params }: { params: Promise<{ token: string }> }) {

@@ -1,4 +1,4 @@
-# HTTP — ACME-challenge (webroot) и редирект на HTTPS.
+# HTTP - ACME-challenge (webroot) и редирект на HTTPS.
 server {
     listen 80;
     listen [::]:80;
@@ -21,7 +21,7 @@ server {
     ssl_certificate /etc/letsencrypt/live/{{ domain }}/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/{{ domain }}/privkey.pem;
 
-    # TLS-параметры инлайн — пакет python3-certbot-nginx нам не нужен.
+    # TLS-параметры инлайн - пакет python3-certbot-nginx нам не нужен.
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_prefer_server_ciphers off;
     ssl_session_cache shared:SSL:10m;
@@ -38,7 +38,7 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
 
-        # SSE / long polling нужны на этапе 9 (карта).
+        # SSE / long polling для карты.
         proxy_buffering off;
         proxy_cache off;
         proxy_read_timeout 1h;

@@ -110,7 +110,7 @@ export async function updateUserAction(
     return { fieldErrors: collectFieldErrors(parsed.error) };
   }
 
-  // Захист: адмін не повинен випадково забрати в себе роль або деактивувати себе.
+  // Адмін не повинен зняти із себе роль чи деактивувати себе.
   const isSelf = session.user.id === id;
   if (isSelf && parsed.data.role !== "admin") {
     return { fieldErrors: { role: "Не можна зняти адміна із себе" } };
@@ -148,7 +148,7 @@ export async function toggleUserActiveAction(formData: FormData) {
   if (!id) return;
 
   if (session.user.id === id) {
-    // safety net — реально вимкнена в UI кнопка для self
+    // Кнопка для self вимкнена в UI; це - safety net.
     return;
   }
 

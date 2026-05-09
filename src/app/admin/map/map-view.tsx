@@ -54,7 +54,6 @@ function FocusController({
   const initialFitDone = useRef(false);
   const lastFocusToken = useRef(focusToken);
 
-  // Initial fit-bounds across all visible markers (once).
   useEffect(() => {
     if (initialFitDone.current) return;
     const positions = shipments
@@ -65,7 +64,6 @@ function FocusController({
     initialFitDone.current = true;
   }, [map, shipments]);
 
-  // Focus on selected shipment whenever the user clicks "Show on map".
   useEffect(() => {
     if (focusToken === lastFocusToken.current) return;
     lastFocusToken.current = focusToken;
@@ -98,7 +96,7 @@ function FocusController({
 export function MapView({ shipments, selectedId, history, focusToken }: Props) {
   const center = useMemo<[number, number]>(() => {
     const first = shipments.find((s) => s.lastPoint);
-    if (!first?.lastPoint) return [50.45, 30.52]; // Київ — fallback
+    if (!first?.lastPoint) return [50.45, 30.52]; // Київ - fallback
     return [first.lastPoint.latitude, first.lastPoint.longitude];
   }, [shipments]);
 

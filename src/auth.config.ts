@@ -1,8 +1,6 @@
 import type { NextAuthConfig } from "next-auth";
 
-// Edge-safe конфиг — без Prisma и bcrypt.
-// Используется в middleware (Edge runtime) и расширяется в auth.ts реальным
-// Credentials provider для API-роутов.
+// Edge-safe: без Prisma и bcrypt. Реальный Credentials provider - в auth.ts.
 export const authConfig = {
   pages: {
     signIn: "/login",

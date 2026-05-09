@@ -13,8 +13,7 @@ type Buffered = {
 };
 
 const BUFFER_KEY = (token: string) => `fl_track_buffer_${token}`;
-// Минимальный интервал между отправками (сервер всё равно держит rate limit ~1/5с,
-// мы накидываем сверху, чтобы не жечь батарею).
+// Сервер держит rate limit ~1/5с; накидываем сверху, чтобы не жечь батарею.
 const MIN_SEND_INTERVAL_MS = 10_000;
 
 function readBuffer(token: string): Buffered[] {
@@ -34,7 +33,7 @@ function writeBuffer(token: string, items: Buffered[]) {
   try {
     window.localStorage.setItem(BUFFER_KEY(token), JSON.stringify(items.slice(-200)));
   } catch {
-    // localStorage может быть выключен — это ок, просто не буферим.
+    // localStorage может быть выключен - просто не буферим.
   }
 }
 
@@ -98,7 +97,7 @@ export function TrackClient({ token }: { token: string }) {
       }
 
       setStatus("sending");
-      // Сначала пытаемся досылать буфер, иначе свежие точки могут уйти раньше старых.
+      // Сначала буфер, иначе свежая точка обгонит старые.
       await flushBuffer();
       const ok = await postPoint(token, point);
       if (ok) {
@@ -166,7 +165,6 @@ export function TrackClient({ token }: { token: string }) {
     setStatus("idle");
   }, []);
 
-  // Досыл буфера при возврате сети.
   useEffect(() => {
     if (typeof window === "undefined") return;
     const onOnline = () => {
@@ -176,7 +174,6 @@ export function TrackClient({ token }: { token: string }) {
     return () => window.removeEventListener("online", onOnline);
   }, [flushBuffer]);
 
-  // На всякий случай останавливаем watch при выгрузке.
   useEffect(() => {
     return () => {
       if (watchIdRef.current != null && typeof navigator !== "undefined") {
@@ -193,7 +190,7 @@ export function TrackClient({ token }: { token: string }) {
     sending: "відправка…",
     ok: "координати надходять",
     error: "помилка відправки",
-    offline: "немає мережі — координати в буфері",
+    offline: "немає мережі - координати в буфері",
   };
 
   return (
@@ -224,7 +221,7 @@ export function TrackClient({ token }: { token: string }) {
 
       <p className="muted track-hint">
         Не закривайте вкладку, поки ведете вантаж. На деяких пристроях геолокація у фоні
-        призупиняється операційною системою — тому ми намагаємось тримати екран активним.
+        призупиняється операційною системою - тому ми намагаємось тримати екран активним.
       </p>
     </div>
   );
