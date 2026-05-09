@@ -378,7 +378,7 @@ th {
   display: flex;
   gap: 1.25rem;
   align-items: center;
-  padding: 0.85rem 1.5rem;
+  padding: 0.25rem 2rem;
   background: rgba(17, 20, 27, 0.85);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
@@ -418,8 +418,9 @@ th {
 }
 
 .admin-nav .admin-nav-brand img {
-  width: 24px;
+  width: 48px;
   height: auto;
+  filter: saturate(1.6) brightness(1.4) drop-shadow(0 0 12px rgba(115, 18, 208, 0.65));
 }
 
 .admin-nav-links {
@@ -631,10 +632,15 @@ th {
 }
 
 .landing-logo {
-  width: clamp(72px, 10vw, 110px);
+  width: clamp(180px, 28vw, 320px);
   height: auto;
-  margin: 0 auto 1.25rem;
+  margin: 0 auto 1.5rem;
   display: block;
+  filter:
+    saturate(1.4)
+    brightness(1.15)
+    drop-shadow(0 0 28px rgba(115, 18, 208, 0.55))
+    drop-shadow(0 0 48px rgba(74, 195, 32, 0.35));
 }
 
 .landing-eyebrow {
@@ -779,8 +785,9 @@ th {
 }
 
 .login-brand img {
-  width: 28px;
+  width: 40px;
   height: auto;
+  filter: saturate(1.4) brightness(1.15) drop-shadow(0 0 12px rgba(115, 18, 208, 0.5));
 }
 
 .login-card h1 {

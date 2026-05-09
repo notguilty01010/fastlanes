@@ -9,7 +9,7 @@ export default async function Home() {
     <main className="landing">
       <section className="landing-hero">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src="/logo.svg" alt="FastLanes" width={120} height={130} className="landing-logo" />
+        <img src="/logo.svg" alt="FastLanes" width={300} height={326} className="landing-logo" />
         <span className="landing-eyebrow">FastLanes</span>
         <h1>Логістичний трекер</h1>
         <p className="landing-lead">
