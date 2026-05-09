@@ -175,6 +175,8 @@ export default async function ShipmentDetailPage({
             destination: shipment.destination,
             status: shipment.status,
             managerId: shipment.managerId,
+            departureAt: shipment.departureAt,
+            arrivalAt: shipment.arrivalAt,
           }}
         />
       </section>

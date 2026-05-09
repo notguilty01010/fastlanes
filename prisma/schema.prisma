@@ -49,6 +49,8 @@ model Shipment {
   origin      String
   destination String
   managerId   String?        @map("manager_id")
+  departureAt DateTime?      @map("departure_at")
+  arrivalAt   DateTime?      @map("arrival_at")
   createdAt   DateTime       @default(now()) @map("created_at")
   updatedAt   DateTime       @updatedAt @map("updated_at")
 

@@ -780,6 +780,165 @@ th {
   border: 2px solid var(--bg);
 }
 
+.fl-marker-pin-selected {
+  background: linear-gradient(135deg, var(--warning), #f59e0b);
+  box-shadow: 0 4px 14px rgba(240, 160, 32, 0.55), 0 0 0 4px rgba(240, 160, 32, 0.28);
+  border-color: var(--bg);
+}
+
+/* Map page layout */
+.map-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 1rem;
+  align-items: start;
+}
+
+.map-layout-map {
+  min-width: 0;
+}
+
+.map-sidebar {
+  max-height: calc(100vh - 180px);
+  overflow-y: auto;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.map-sidebar-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.map-sidebar-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.map-status-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.map-status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+  user-select: none;
+  opacity: 0.55;
+  transition: opacity 120ms ease, background 120ms ease;
+}
+
+.map-status-chip.is-on {
+  opacity: 1;
+}
+
+.map-status-chip input[type="checkbox"] {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.map-shipment-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.map-shipment-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--bg-elev-2);
+  transition: border-color 120ms ease, background 120ms ease;
+}
+
+.map-shipment-card:hover {
+  border-color: var(--border-strong);
+}
+
+.map-shipment-card.is-selected {
+  border-color: var(--accent);
+  background: rgba(99, 102, 241, 0.08);
+}
+
+.map-shipment-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.map-shipment-route {
+  font-size: 0.85rem;
+}
+
+.map-shipment-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  font-size: 0.8rem;
+}
+
+.map-history {
+  margin-top: 0.5rem;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.map-history-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.map-history-table-wrap {
+  max-height: 240px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.map-history-table {
+  font-size: 0.78rem;
+}
+
+.map-history-table th,
+.map-history-table td {
+  padding: 0.4rem 0.6rem;
+}
+
+@media (max-width: 900px) {
+  .map-layout {
+    grid-template-columns: 1fr;
+  }
+  .map-sidebar {
+    max-height: 50vh;
+  }
+}
+
 /* Leaflet popup в нашей тёмной теме */
 .leaflet-popup-content-wrapper,
 .leaflet-popup-tip {

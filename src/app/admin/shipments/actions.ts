@@ -8,6 +8,13 @@ import { requireAdmin } from "@/lib/auth-helpers";
 import { prisma } from "@/lib/prisma";
 import { SHIPMENT_STATUSES } from "@/lib/shipment-status";
 
+const optionalDate = z
+  .string()
+  .max(64)
+  .optional()
+  .transform((v) => (v && v.length > 0 ? new Date(v) : null))
+  .refine((d) => d === null || !Number.isNaN(d.getTime()), "Невірна дата");
+
 const baseSchema = z.object({
   title: z.string().min(1, "Введіть назву").max(200),
   description: z
@@ -23,14 +30,35 @@ const baseSchema = z.object({
     .max(64)
     .optional()
     .transform((v) => (v && v.length > 0 ? v : null)),
+  departureAt: optionalDate,
+  arrivalAt: optionalDate,
 });
+
+type FieldKey =
+  | "title"
+  | "description"
+  | "origin"
+  | "destination"
+  | "status"
+  | "managerId"
+  | "departureAt"
+  | "arrivalAt";
 
 export type ShipmentFormState = {
   error?: string;
-  fieldErrors?: Partial<
-    Record<"title" | "description" | "origin" | "destination" | "status" | "managerId", string>
-  >;
+  fieldErrors?: Partial<Record<FieldKey, string>>;
 };
+
+const FIELD_KEYS: readonly FieldKey[] = [
+  "title",
+  "description",
+  "origin",
+  "destination",
+  "status",
+  "managerId",
+  "departureAt",
+  "arrivalAt",
+];
 
 function parseForm(formData: FormData) {
   return {
@@ -40,6 +68,8 @@ function parseForm(formData: FormData) {
     destination: String(formData.get("destination") ?? "").trim(),
     status: String(formData.get("status") ?? "created"),
     managerId: String(formData.get("managerId") ?? "").trim(),
+    departureAt: String(formData.get("departureAt") ?? "").trim(),
+    arrivalAt: String(formData.get("arrivalAt") ?? "").trim(),
   };
 }
 
@@ -47,15 +77,8 @@ function collectFieldErrors(error: z.ZodError): ShipmentFormState["fieldErrors"]
   const out: ShipmentFormState["fieldErrors"] = {};
   for (const issue of error.issues) {
     const key = issue.path[0];
-    if (
-      key === "title" ||
-      key === "description" ||
-      key === "origin" ||
-      key === "destination" ||
-      key === "status" ||
-      key === "managerId"
-    ) {
-      out[key] = issue.message;
+    if (typeof key === "string" && (FIELD_KEYS as readonly string[]).includes(key)) {
+      out[key as FieldKey] = issue.message;
     }
   }
   return out;
@@ -80,6 +103,8 @@ export async function createShipmentAction(
       destination: parsed.data.destination,
       status: parsed.data.status,
       managerId: parsed.data.managerId ?? session.user.id,
+      departureAt: parsed.data.departureAt,
+      arrivalAt: parsed.data.arrivalAt,
     },
   });
 
@@ -108,6 +133,8 @@ export async function updateShipmentAction(
       destination: parsed.data.destination,
       status: parsed.data.status,
       managerId: parsed.data.managerId,
+      departureAt: parsed.data.departureAt,
+      arrivalAt: parsed.data.arrivalAt,
     },
   });
 

@@ -23,8 +23,18 @@ type Props = {
     destination: string;
     status: ShipmentStatus;
     managerId: string | null;
+    departureAt: Date | null;
+    arrivalAt: Date | null;
   };
 };
+
+// `<input type="datetime-local">` приймає лише `YYYY-MM-DDTHH:mm` без таймзони.
+// ISO-стрічка з мс/секундами/Z ламає підстановку defaultValue. Збираємо у локальному часі браузера.
+function toDateTimeLocalValue(date: Date | null | undefined): string {
+  if (!date) return "";
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
 
 function SubmitButton({ mode }: { mode: Props["mode"] }) {
   const { pending } = useFormStatus();
@@ -96,6 +106,32 @@ export function ShipmentForm({ mode, action, managers, defaultValues }: Props) {
         />
         {state.fieldErrors?.destination ? (
           <small className="error">{state.fieldErrors.destination}</small>
+        ) : null}
+      </label>
+
+      <label>
+        Планова дата відправлення
+        <input
+          name="departureAt"
+          type="datetime-local"
+          defaultValue={toDateTimeLocalValue(defaultValues?.departureAt)}
+          aria-invalid={state.fieldErrors?.departureAt ? true : undefined}
+        />
+        {state.fieldErrors?.departureAt ? (
+          <small className="error">{state.fieldErrors.departureAt}</small>
+        ) : null}
+      </label>
+
+      <label>
+        Планова дата прибуття
+        <input
+          name="arrivalAt"
+          type="datetime-local"
+          defaultValue={toDateTimeLocalValue(defaultValues?.arrivalAt)}
+          aria-invalid={state.fieldErrors?.arrivalAt ? true : undefined}
+        />
+        {state.fieldErrors?.arrivalAt ? (
+          <small className="error">{state.fieldErrors.arrivalAt}</small>
         ) : null}
       </label>
 
