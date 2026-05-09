@@ -142,14 +142,6 @@ export function MapClient() {
         </span>
       </div>
       <div className="map-layout">
-        <div className="map-layout-map">
-          <MapView
-            shipments={shipments}
-            selectedId={selectedId}
-            history={history}
-            focusToken={focusToken}
-          />
-        </div>
         <ShipmentsSidebar
           shipments={shipments}
           statusFilter={statusFilter}
@@ -160,6 +152,14 @@ export function MapClient() {
           historyState={historyState}
           onRetryHistory={retryHistory}
         />
+        <div className="map-layout-map">
+          <MapView
+            shipments={shipments}
+            selectedId={selectedId}
+            history={history}
+            focusToken={focusToken}
+          />
+        </div>
       </div>
     </>
   );

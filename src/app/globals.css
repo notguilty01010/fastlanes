@@ -893,7 +893,7 @@ th {
 /* Map page layout */
 .map-layout {
   display: grid;
-  grid-template-columns: 1fr 440px;
+  grid-template-columns: 440px 1fr;
   gap: 1rem;
   align-items: start;
 }
