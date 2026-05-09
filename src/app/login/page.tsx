@@ -22,7 +22,11 @@ export default async function LoginPage({
   return (
     <main className="login-page">
       <div className="login-card">
-        <div className="login-brand">FastLanes</div>
+        <div className="login-brand">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.svg" alt="" width={28} height={30} aria-hidden />
+          <span>FastLanes</span>
+        </div>
         <h1>Вхід</h1>
         <p className="muted">Введіть email та пароль для доступу до адмінки.</p>
         <LoginForm callbackUrl={params.callbackUrl} initialError={params.error} />

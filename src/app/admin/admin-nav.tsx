@@ -12,7 +12,9 @@ export function AdminNav({ email }: { email?: string | null }) {
   return (
     <nav className={`admin-nav${open ? " is-open" : ""}`}>
       <Link href="/admin" className="admin-nav-brand" onClick={close}>
-        FastLanes
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src="/logo.svg" alt="" width={24} height={26} aria-hidden />
+        <span>FastLanes</span>
       </Link>
       <button
         type="button"
